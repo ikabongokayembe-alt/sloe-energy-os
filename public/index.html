@@ -404,6 +404,127 @@
         </div>
       </div>
 
+      <!-- WORKSPACE TOOL 5 (MERCHANT GROWTH): ERCOT / CAISO QUANT & RENEWABLE FORECAST -->
+      <div class="view-screen" id="view-quant-forecast">
+        <div class="ops-page-header">
+          <h2>🌤️ ERCOT & CAISO Quant Forecast Engine</h2>
+          <p>Real-time renewable solar irradiance, wind ramp volatility, and 24-hour day-ahead LMP price forecasting.</p>
+        </div>
+
+        <div class="four-kpi-grid">
+          <div class="slate-kpi-card"><span class="kpi-title">24-HR LMP SPREAD</span><span class="kpi-number green-text">$218.40 / MWh</span><span class="kpi-desc">Max Spread Arbitrage Horizon</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">SOLAR RAMP FORECAST</span><span class="kpi-number cyan-text">420 MW Peak</span><span class="kpi-desc">ERCOT West Solar Irradiance</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">QUANT CONFIDENCE</span><span class="kpi-number green-text">94.8%</span><span class="kpi-desc">Ensemble Model Accuracy</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">GRID CONGESTION</span><span class="kpi-number amber-text">HIGH RISK</span><span class="kpi-desc">South-to-North Transmission Bottleneck</span></div>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="slate-card flex-2">
+            <div class="card-header-row">
+              <h3>Day-Ahead Wholesale Price Forecast vs Real-Time Spot</h3>
+              <span class="status-pill green">Quant Neural Engine Active</span>
+            </div>
+            <div style="background:var(--slate-950); padding:1.25rem; border-radius:8px; border:1px solid var(--slate-800); margin-top:0.75rem;">
+              <table class="queue-table">
+                <thead><tr><th>Time Hour</th><th>Node ID</th><th>Forecast LMP ($/MWh)</th><th>Solar Generation (MW)</th><th>Recommended Action</th></tr></thead>
+                <tbody>
+                  <tr><td style="color:#fff; font-weight:bold;">12:00 PM (Solar Peak)</td><td>ERCOT West</td><td><span style="color:var(--emerald-400); font-weight:bold;">$14.20 / MWh</span></td><td>395 MW</td><td><span class="status-pill cyan">Full Charge (1.0C)</span></td></tr>
+                  <tr><td style="color:#fff; font-weight:bold;">02:00 PM</td><td>ERCOT West</td><td>$28.50 / MWh</td><td>410 MW</td><td><span class="status-pill yellow">Standby / Hold SoC</span></td></tr>
+                  <tr><td style="color:#fff; font-weight:bold;">06:30 PM (Evening Spike)</td><td>ERCOT South</td><td><span style="color:var(--amber-500); font-weight:bold;">$248.50 / MWh</span></td><td>45 MW</td><td><span class="status-pill green">Discharge Max (2.0C)</span></td></tr>
+                  <tr><td style="color:#fff; font-weight:bold;">08:00 PM</td><td>ERCOT Houston</td><td>$185.00 / MWh</td><td>0 MW</td><td><span class="status-pill green">Discharge (1.2C)</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="slate-card flex-1">
+            <h3>Quant Model Sensitivity Tuning</h3>
+            <div class="form-row">
+              <label>Solar Irradiance Bias Offset: <strong id="quant-bias-val">+0%</strong></label>
+              <input type="range" min="-20" max="20" value="0" oninput="document.getElementById('quant-bias-val').innerText = (this.value > 0 ? '+' : '') + this.value + '%'">
+            </div>
+            <div class="form-row">
+              <label>Thermal Generation Outage Factor: <strong id="quant-thermal-val">Medium (1.2x)</strong></label>
+              <select style="background:var(--slate-950); color:#fff; border:1px solid var(--slate-800); padding:0.5rem; border-radius:6px;">
+                <option>Low Risk (1.0x baseline)</option>
+                <option selected>Medium Risk (1.2x price multiplier)</option>
+                <option>High Surge (2.5x ERCOT scarcity pricing)</option>
+              </select>
+            </div>
+            <button class="btn-primary-action" style="margin-top:1rem;" onclick="runQuantSimulation()">⚡ Push Bidding Curve to SCADA Gateway</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TOOL 6 (MERCHANT GROWTH): BILATERAL PPA & FINANCIAL HEDGES -->
+      <div class="view-screen" id="view-ppa-hedges">
+        <div class="ops-page-header">
+          <h2>📜 Bilateral PPA, Heat Rate Call Options & Financial Hedges</h2>
+          <p>Structure, track, and settle synthetic battery energy hedges, heat rate call options, and fixed-for-floating swap contracts.</p>
+        </div>
+
+        <div class="four-kpi-grid">
+          <div class="slate-kpi-card"><span class="kpi-title">HEDGE COVERAGE RATIO</span><span class="kpi-number cyan-text">65.0%</span><span class="kpi-desc">35% Open Wholesale Merchant Exposure</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">FIXED STRIKE PRICE</span><span class="kpi-number green-text">$42.50 / MWh</span><span class="kpi-desc">Weighted Swap Target</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">NET MTM SETTLEMENT PnL</span><span class="kpi-number green-text">+$142,850</span><span class="kpi-desc">Mark-to-Market Portfolio Value</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">COUNTERPARTY CREDIT</span><span class="kpi-number green-text">A+ RATED</span><span class="kpi-desc">Tier-1 Utility & Energy Trader Standard</span></div>
+        </div>
+
+        <div class="slate-card">
+          <div class="card-header-row">
+            <h3>Active Financial Derivatives & Hedge Portfolio</h3>
+            <button class="btn-primary-action" onclick="openHedgeModal()">+ Execute New Synthetic Hedge</button>
+          </div>
+
+          <table class="queue-table">
+            <thead>
+              <tr>
+                <th>Deal ID</th>
+                <th>Instrument Type</th>
+                <th>Counterparty</th>
+                <th>Volume (MW)</th>
+                <th>Strike Price</th>
+                <th>Expiry Date</th>
+                <th>MTM Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="hedges-tbody">
+              <tr>
+                <td style="color:#fff; font-weight:bold;">#HDG-8810</td>
+                <td>Fixed-for-Floating Swap</td>
+                <td>Morgan Stanley Commodities</td>
+                <td>20 MW</td>
+                <td>$45.00 / MWh</td>
+                <td>Dec 31, 2026</td>
+                <td><span style="color:var(--emerald-400); font-weight:bold;">+$85,200</span></td>
+                <td><span class="status-pill green">Active</span></td>
+              </tr>
+              <tr>
+                <td style="color:#fff; font-weight:bold;">#HDG-8811</td>
+                <td>Heat Rate Call Option (HRCO)</td>
+                <td>Vitol Energy Trading</td>
+                <td>15 MW</td>
+                <td>10.5 MMBtu/MWh</td>
+                <td>Nov 30, 2026</td>
+                <td><span style="color:var(--emerald-400); font-weight:bold;">+$57,650</span></td>
+                <td><span class="status-pill green">Active</span></td>
+              </tr>
+              <tr>
+                <td style="color:#fff; font-weight:bold;">#HDG-8812</td>
+                <td>Virtual PPA Settlement</td>
+                <td>Constellation Energy</td>
+                <td>10 MW</td>
+                <td>$38.50 / MWh</td>
+                <td>Jun 30, 2027</td>
+                <td><span style="color:var(--emerald-400); font-weight:bold;">+$14,000</span></td>
+                <td><span class="status-pill green">Active</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- SCREEN 3: AI AGENTS -->
       <div class="view-screen" id="view-ai-agents">
         <div class="ops-page-header">

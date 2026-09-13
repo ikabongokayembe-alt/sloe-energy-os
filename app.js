@@ -435,6 +435,37 @@ function saveSettings() {
   appendConsoleLine('[SETTINGS]: Updated hardware operating boundaries.', 'action');
 }
 
+function runQuantSimulation() {
+  alert('⚡ Bidding Curve Updated: Pushed 24-hour day-ahead LMP price forecast to SCADA Market Gateway.');
+  appendConsoleLine('[QUANT ENGINE]: Calculated 24-hr LMP bidding curve & pushed to Modbus Gateway.', 'action');
+}
+
+function openHedgeModal() {
+  const counterparty = prompt('Enter Hedge Counterparty (e.g. Morgan Stanley, Vitol, Shell Energy):', 'Vitol Energy Trading');
+  if (!counterparty) return;
+  const volume = prompt('Enter Volume (MW):', '15');
+  const strike = prompt('Enter Strike Price ($/MWh):', '42.50');
+  
+  const tbody = document.getElementById('hedges-tbody');
+  if (tbody) {
+    const tr = document.createElement('tr');
+    const newId = `#HDG-${Math.floor(8800 + Math.random() * 100)}`;
+    tr.innerHTML = `
+      <td style="color:#fff; font-weight:bold;">${newId}</td>
+      <td>Fixed-for-Floating Swap</td>
+      <td>${counterparty}</td>
+      <td>${volume} MW</td>
+      <td>$${strike} / MWh</td>
+      <td>Dec 31, 2026</td>
+      <td><span style="color:var(--emerald-400); font-weight:bold;">+$12,500</span></td>
+      <td><span class="status-pill green">Active</span></td>
+    `;
+    tbody.prepend(tr);
+    alert(`Synthetic Hedge ${newId} for ${volume} MW at $${strike}/MWh with ${counterparty} executed!`);
+    appendConsoleLine(`[PPA HEDGE ENGINE]: Executed synthetic hedge ${newId} with ${counterparty}.`, 'action');
+  }
+}
+
 function handleGlobalSearch(e) {
   if (e.key === 'Enter') alert(`Searching Sloe Energy OS for "${e.target.value}"...`);
 }

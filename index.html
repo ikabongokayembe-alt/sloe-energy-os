@@ -17,10 +17,12 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar-nav">
       <div class="sidebar-brand">
-        <span class="brand-icon">⚡</span>
+        <div class="brand-logo-glow">
+          <span class="brand-icon">⚡</span>
+        </div>
         <div class="brand-text">
-          <span class="brand-title">SLOE ENERGY</span>
-          <span class="brand-sub">AGENTIC OS v2.4</span>
+          <span class="brand-title">SLOE ENERGY OS</span>
+          <span class="brand-sub">SLOE LABS ENTERPRISE</span>
         </div>
       </div>
 
@@ -35,7 +37,7 @@
         </button>
         <button class="nav-item" id="nav-ai-agents" onclick="navigateTo('ai-agents')">
           <span class="nav-icon">🤖</span>
-          <span class="nav-label">AI Agents Control Room</span>
+          <span class="nav-label">AI Agents Workspace</span>
         </button>
         <button class="nav-item" id="nav-integrations" onclick="navigateTo('integrations')">
           <span class="nav-icon">🔌</span>
@@ -67,12 +69,16 @@
         <div class="header-left">
           <div class="status-indicator">
             <span class="status-dot pulsing"></span>
-            <span class="status-text">LIVE GRID TELEMETRY</span>
+            <span class="status-text">GRID TELEMETRY LIVE</span>
+          </div>
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search BESS assets, SCADA sensors, work orders..." onkeyup="handleGlobalSearch(event)">
           </div>
         </div>
 
-        <!-- Mode Selector Container (Active on Operations Workspace) -->
-        <div class="mode-selector-container" id="header-mode-selector">
+        <!-- Domain Mode Selector (Sloe OS Operational Lens) -->
+        <div class="mode-selector-container">
           <span class="selector-label">OPERATIONAL LENS:</span>
           <div class="mode-pills">
             <button class="mode-btn active" id="btn-mode-contracted" onclick="switchMode('CONTRACTED_OPS')">
@@ -96,7 +102,7 @@
         <div class="header-right">
           <button class="btn-agent-toggle" onclick="toggleAgentDrawer()">
             <span class="bot-sparkle">✨</span>
-            <span>SLOE DRAWER</span>
+            <span>SLOE AGENT DRAWER</span>
           </button>
         </div>
       </header>
@@ -109,13 +115,13 @@
             <p>Executive Overview & Portfolio-wide Telemetry for Utility-Scale Energy Assets</p>
           </div>
           <div class="action-bar">
-            <button class="btn-sm btn-primary" onclick="simulateNewEvent()">+ Trigger Telemetry Event</button>
+            <button class="btn-sm btn-primary" onclick="simulateNewEvent()">+ Trigger SCADA Simulation Event</button>
           </div>
         </div>
 
         <div class="kpi-banner-grid">
           <div class="kpi-card">
-            <span class="kpi-label">TOTAL FLEET CAPACITY</span>
+            <span class="kpi-label">FLEET TOTAL CAPACITY</span>
             <span class="kpi-val">1.25 GW / 4.8 GWh</span>
             <span class="kpi-sub positive">▲ +150 MW Solar Addition</span>
           </div>
@@ -246,11 +252,11 @@
         </div>
       </section>
 
-      <!-- SCREEN 3: AI AGENTS CONTROL ROOM -->
+      <!-- SCREEN 3: AI AGENTS WORKSPACE -->
       <section class="screen-view" id="screen-ai-agents">
         <div class="screen-header">
           <div>
-            <h2>🤖 AI Agents Control Room</h2>
+            <h2>🤖 AI Agents Workspace</h2>
             <p>Manage, Test, and Audit Autonomous Energy Agents across Battery Physics, Warranties, and Trading</p>
           </div>
         </div>
@@ -333,13 +339,13 @@
     </div>
   </div>
 
-  <!-- Slide-out Drawer -->
+  <!-- Slide-out Agent Drawer -->
   <aside class="agent-drawer" id="agent-drawer">
     <div class="drawer-header">
       <div class="drawer-title">
         <span class="sparkle-icon">✨</span>
         <div>
-          <h3>SLOE Multi-Agent Drawer</h3>
+          <h3>SLOE Multi-Agent Suite</h3>
           <p id="drawer-sub">Active Agent Suite</p>
         </div>
       </div>

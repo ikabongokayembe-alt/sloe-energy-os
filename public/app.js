@@ -1,7 +1,7 @@
-// SLOE Energy OS Dedicated Tool Workspaces & Application Logic
+// SLOE Energy OS Core Application Logic
 
 let activeView = 'today';
-let currentDomain = 'contracted';
+let currentDomain = 'contracted'; // 'contracted' or 'merchant'
 let degradationChartInstance = null;
 let arbitrageChartInstance = null;
 let currentCategory = 'all';
@@ -16,10 +16,11 @@ const COMPOSIO_CATALOG = [
   { name: 'IBM Maximo Asset Mgmt', cat: 'erp', catLabel: 'ENTERPRISE ERP', icon: '🏗️', desc: 'Syncs SLA availability penalty metrics and long-term asset health records.', ready: false }
 ];
 
-// Market Domain Navigation Structure
+// Market Domain Configurations
 const NAV_CONFIG = {
   contracted: {
-    domainBadge: 'CONTRACTED MODE',
+    domainBadge: 'CONTRACTED MODE ▾',
+    domainClass: 'contracted-style',
     toggleLabel: 'Switch to Merchant Market',
     todayBadge: 'CONTRACTED ASSET OPERATIONS',
     todayDesc: 'Live availability tracking & telemetry-backed exception queue for PPA & Tolling contracts.',
@@ -43,7 +44,8 @@ const NAV_CONFIG = {
     ]
   },
   merchant: {
-    domainBadge: 'MERCHANT MODE',
+    domainBadge: 'MERCHANT MODE ▾',
+    domainClass: 'merchant-style',
     toggleLabel: 'Switch to Contracted Ops',
     todayBadge: 'MERCHANT MARKET OPERATIONS',
     todayDesc: 'Live 5-minute wholesale ERCOT/CAISO LMP bidding & real-time arbitrage optimization.',
@@ -78,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderThermalHeatmap();
 });
 
-// Router supporting dedicated tool screens
+// Router
 function navigateTo(viewId) {
   activeView = viewId;
 
@@ -91,7 +93,6 @@ function navigateTo(viewId) {
   if (targetView) targetView.classList.add('active');
   if (targetNav) targetNav.classList.add('active');
 
-  // Trigger chart resizes if navigating into a chart workspace
   if (viewId === 'tool-degradation' && degradationChartInstance) {
     setTimeout(() => degradationChartInstance.resize(), 100);
   }
@@ -100,39 +101,68 @@ function navigateTo(viewId) {
   }
 }
 
-// Domain Switcher
+// Domain Switcher (Toggle Market Modes)
 function toggleDomainModal() {
   currentDomain = currentDomain === 'contracted' ? 'merchant' : 'contracted';
   document.body.className = `mode-${currentDomain}`;
+  
   renderDynamicNav();
   renderTableData();
+
+  appendConsoleLine(`[DOMAIN SWITCHER]: Active Market Domain toggled to ${currentDomain.toUpperCase()} MODE. Re-routed navigation items.`, 'action');
 }
 
 function renderDynamicNav() {
   const config = NAV_CONFIG[currentDomain];
 
-  document.getElementById('domain-badge-text').innerText = config.domainBadge;
-  document.getElementById('domain-toggle-label').innerText = config.toggleLabel;
-  document.getElementById('today-market-badge').innerText = config.todayBadge;
-  document.getElementById('today-hero-desc').innerText = config.todayDesc;
-  document.getElementById('tool1-name').innerText = config.tool1Name;
-  document.getElementById('tool1-desc').innerText = config.tool1Desc;
-  document.getElementById('tool2-name').innerText = config.tool2Name;
-  document.getElementById('tool2-desc').innerText = config.tool2Desc;
+  const domainBadge = document.getElementById('domain-badge-text');
+  if (domainBadge) {
+    domainBadge.innerText = config.domainBadge;
+    domainBadge.className = `domain-badge ${config.domainClass}`;
+  }
 
-  document.getElementById('dynamic-ops-nav').innerHTML = config.opsNav.map(item => `
-    <button type="button" class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
-      <span class="nav-icon">${item.icon}</span>
-      <span>${item.label}</span>
-    </button>
-  `).join('');
+  const toggleLabel = document.getElementById('domain-toggle-label');
+  if (toggleLabel) toggleLabel.innerText = config.toggleLabel;
 
-  document.getElementById('dynamic-growth-nav').innerHTML = config.growthNav.map(item => `
-    <button type="button" class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
-      <span class="nav-icon">${item.icon}</span>
-      <span>${item.label}</span>
-    </button>
-  `).join('');
+  const todayBadge = document.getElementById('today-market-badge');
+  if (todayBadge) todayBadge.innerText = config.todayBadge;
+
+  const todayDesc = document.getElementById('today-hero-desc');
+  if (todayDesc) todayDesc.innerText = config.todayDesc;
+
+  const tool1Name = document.getElementById('tool1-name');
+  if (tool1Name) tool1Name.innerText = config.tool1Name;
+
+  const tool1Desc = document.getElementById('tool1-desc');
+  if (tool1Desc) tool1Desc.innerText = config.tool1Desc;
+
+  const tool2Name = document.getElementById('tool2-name');
+  if (tool2Name) tool2Name.innerText = config.tool2Name;
+
+  const tool2Desc = document.getElementById('tool2-desc');
+  if (tool2Desc) tool2Desc.innerText = config.tool2Desc;
+
+  // Render Operations Sub-nav
+  const opsNav = document.getElementById('dynamic-ops-nav');
+  if (opsNav) {
+    opsNav.innerHTML = config.opsNav.map(item => `
+      <button type="button" class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
+        <span class="nav-icon">${item.icon}</span>
+        <span>${item.label}</span>
+      </button>
+    `).join('');
+  }
+
+  // Render Growth Sub-nav
+  const growthNav = document.getElementById('dynamic-growth-nav');
+  if (growthNav) {
+    growthNav.innerHTML = config.growthNav.map(item => `
+      <button type="button" class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
+        <span class="nav-icon">${item.icon}</span>
+        <span>${item.label}</span>
+      </button>
+    `).join('');
+  }
 }
 
 function renderTableData() {
@@ -155,13 +185,13 @@ function renderTableData() {
   `).join('');
 }
 
-// 📊 TOOL 1: AVAILABILITY SLA TRACKER FUNCTIONS
+// 📊 TOOL 1: AVAILABILITY SLA TRACKER
 function downloadSlaReport() {
   alert('Generating & downloading SEC & Utility PPA Availability Compliance Memo (PDF)... Verified 99.82% Uptime.');
   appendConsoleLine('[SLA TOOL]: Downloaded stamped Availability Compliance Memo (PDF).', 'action');
 }
 
-// 📉 TOOL 2: THERMAL FADE ENGINE FUNCTIONS
+// 📉 TOOL 2: THERMAL FADE ENGINE
 function renderDegradationChart() {
   const ctx = document.getElementById('degradationChartCanvas')?.getContext('2d');
   if (!ctx) return;
@@ -182,13 +212,8 @@ function renderDegradationChart() {
   });
 }
 
-function updateHvacTemp(val) {
-  document.getElementById('hvac-temp-val').innerText = `${val}°C`;
-}
-
-function updateCRate(val) {
-  document.getElementById('c-rate-val').innerText = `${val} C`;
-}
+function updateHvacTemp(val) { document.getElementById('hvac-temp-val').innerText = `${val}°C`; }
+function updateCRate(val) { document.getElementById('c-rate-val').innerText = `${val} C`; }
 
 function runThermalSimulation() {
   const temp = document.getElementById('hvac-temp-val').innerText;
@@ -216,7 +241,7 @@ function renderThermalHeatmap() {
   }
 }
 
-// ⚡ TOOL 3: LMP SPOT ARBITRAGE RADAR FUNCTIONS
+// ⚡ TOOL 3: LMP SPOT ARBITRAGE RADAR
 function renderArbitrageChart() {
   const ctx = document.getElementById('arbitrageChartCanvas')?.getContext('2d');
   if (!ctx) return;
@@ -253,19 +278,19 @@ function submitMarketBid() {
   appendConsoleLine(`[MARKET BID]: Submitted ${volume} MW bid for ${node}.`, 'action');
 }
 
-// 💰 TOOL 4: CYCLING COST & REVENUE FUNCTIONS
+// 💰 TOOL 4: CYCLING COST & REVENUE
 function recalculateMarginalCost() {
   const capex = document.getElementById('capex-cost').value;
   appendConsoleLine(`[MARGINAL COST]: Recalculating degradation wear cost for CapEx ${capex}...`, 'line');
 }
 
-// 📜 TOOL 5: OEM WARRANTY AUDITOR FUNCTIONS
+// 📜 TOOL 5: OEM WARRANTY AUDITOR
 function downloadWarrantyPackage() {
   alert('Generating & downloading Cryptographically Stamped OEM Warranty Compliance Audit Package (PDF)...');
   appendConsoleLine('[WARRANTY AUDITOR]: Exported OEM Warranty Audit Package (PDF).', 'action');
 }
 
-// 🛠️ TOOL 6: O&M FIELD DISPATCH FUNCTIONS
+// 🛠️ TOOL 6: O&M FIELD DISPATCH
 function dispatchWorkOrder() {
   const unit = document.getElementById('wo-unit').value;
   const priority = document.getElementById('wo-priority').value;
@@ -286,12 +311,8 @@ function dispatchWorkOrder() {
 // Inspection Evidence Modal
 function inspectException(id, unit, trigger, rec) {
   const modal = document.getElementById('app-modal');
-  const title = document.getElementById('modal-title');
-  const body = document.getElementById('modal-body');
-  const footer = document.getElementById('modal-footer');
-
-  title.innerText = `Evidence Inspection: ${id} (${unit})`;
-  body.innerHTML = `
+  document.getElementById('modal-title').innerText = `Evidence Inspection: ${id} (${unit})`;
+  document.getElementById('modal-body').innerHTML = `
     <div style="background:var(--slate-950); padding:0.85rem; border-radius:8px; border:1px solid var(--slate-800);">
       <div style="color:var(--cyan-400); font-family:var(--font-mono); font-size:0.75rem; font-weight:bold;">SCADA TELEMETRY ROOT-CAUSE ANALYSIS</div>
       <div style="font-size:0.95rem; font-weight:bold; color:#fff; margin-top:0.3rem;">${trigger}</div>
@@ -301,7 +322,7 @@ function inspectException(id, unit, trigger, rec) {
       <p style="margin-top:0.25rem;">${rec}. Evaluated against CATL Megapack warranty guidelines and 99.8% Availability SLA requirements.</p>
     </div>
   `;
-  footer.innerHTML = `
+  document.getElementById('modal-footer').innerHTML = `
     <button class="btn-smoke" onclick="closeModalDirect()">Cancel</button>
     <button class="btn-primary-action" onclick="executeInspectionAction('${id}')">Execute Approved Action</button>
   `;

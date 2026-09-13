@@ -23,10 +23,11 @@
         </div>
       </div>
 
+      <!-- DOMAIN SWITCHER PILL BOX (CLICKABLE TOGGLE AS REQUESTED) -->
       <div class="domain-pill-container">
-        <div class="domain-pill-box" onclick="toggleDomainModal()" style="cursor:pointer;" title="Click to switch market domain">
+        <div class="domain-pill-box clickable-domain" id="sidebar-domain-pill" onclick="toggleDomainModal()" title="Click to switch market domain mode">
           <span class="domain-label">Workspace:</span>
-          <span class="domain-badge" id="domain-badge-text">CONTRACTED MODE</span>
+          <span class="domain-badge contracted-style" id="domain-badge-text">CONTRACTED MODE ▾</span>
         </div>
       </div>
 
@@ -119,7 +120,7 @@
                 <h2>Today</h2>
                 <span class="market-badge" id="today-market-badge">CONTRACTED ASSET OPERATIONS</span>
               </div>
-              <p id="today-hero-desc">Live exception queue & telemetry-backed monitoring across utility-scale solar and BESS containers.</p>
+              <p id="today-hero-desc">Live availability tracking & telemetry-backed exception queue for PPA & Tolling contracts.</p>
             </div>
             <button class="btn-primary-action" onclick="simulateEvent()">+ Trigger Telemetry Alert</button>
           </div>
@@ -149,13 +150,13 @@
             <h3>Tools you can evaluate now</h3>
             <p class="card-subtext">These bounded workflows accept real-time SCADA telemetry and market price feeds.</p>
             <div class="tools-grid-mini">
-              <div class="mini-tool-box" onclick="navigateTo('tool-sla')">
+              <div class="mini-tool-box" id="card-tool-1" onclick="navigateTo(currentDomain === 'contracted' ? 'tool-sla' : 'tool-arbitrage')">
                 <span class="mini-tool-icon">📊</span>
                 <h4 id="tool1-name">Availability SLA Tracker</h4>
                 <p id="tool1-desc">Monitor 99.8% plant uptime & contract SLAs.</p>
                 <span class="tool-open-link">Open →</span>
               </div>
-              <div class="mini-tool-box" onclick="navigateTo('tool-degradation')">
+              <div class="mini-tool-box" id="card-tool-2" onclick="navigateTo(currentDomain === 'contracted' ? 'tool-degradation' : 'tool-cycling')">
                 <span class="mini-tool-icon">🛡️</span>
                 <h4 id="tool2-name">Thermal Fade Engine</h4>
                 <p id="tool2-desc">Audit CATL/Tesla battery degradation curves.</p>
@@ -194,26 +195,10 @@
         </div>
 
         <div class="four-kpi-grid">
-          <div class="slate-kpi-card">
-            <span class="kpi-title">CURRENT AVAILABILITY</span>
-            <span class="kpi-number green-text">99.82%</span>
-            <span class="kpi-desc">Target: 98.00% Minimum</span>
-          </div>
-          <div class="slate-kpi-card">
-            <span class="kpi-title">UNPLANNED DOWNTIME</span>
-            <span class="kpi-number">1.4 Hrs</span>
-            <span class="kpi-desc">Allowed: 17.5 Hrs / Quarter</span>
-          </div>
-          <div class="slate-kpi-card">
-            <span class="kpi-title">SLA PENALTY RISK</span>
-            <span class="kpi-number green-text">$0.00</span>
-            <span class="kpi-desc">Zero Outage Penalties Accrued</span>
-          </div>
-          <div class="slate-kpi-card">
-            <span class="kpi-title">OFFTAKER SLA STATUS</span>
-            <span class="kpi-number cyan-text">COMPLIANT</span>
-            <span class="kpi-desc">Utility PPA Verified</span>
-          </div>
+          <div class="slate-kpi-card"><span class="kpi-title">CURRENT AVAILABILITY</span><span class="kpi-number green-text">99.82%</span><span class="kpi-desc">Target: 98.00% Minimum</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">UNPLANNED DOWNTIME</span><span class="kpi-number">1.4 Hrs</span><span class="kpi-desc">Allowed: 17.5 Hrs / Quarter</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">SLA PENALTY RISK</span><span class="kpi-number green-text">$0.00</span><span class="kpi-desc">Zero Outage Penalties Accrued</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">OFFTAKER SLA STATUS</span><span class="kpi-number cyan-text">COMPLIANT</span><span class="kpi-desc">Utility PPA Verified</span></div>
         </div>
 
         <div class="slate-card">
@@ -222,9 +207,7 @@
             <button class="btn-primary-action" onclick="downloadSlaReport()">📥 Download SEC & Utility Compliance Memo (PDF)</button>
           </div>
           <table class="queue-table">
-            <thead>
-              <tr><th>Outage ID</th><th>Container Unit</th><th>Outage Cause</th><th>Duration</th><th>SLA Penalty Impact</th><th>Status</th></tr>
-            </thead>
+            <thead><tr><th>Outage ID</th><th>Container Unit</th><th>Outage Cause</th><th>Duration</th><th>SLA Penalty Impact</th><th>Status</th></tr></thead>
             <tbody>
               <tr><td style="color:#fff; font-weight:bold;">#OUT-102</td><td>BESS Container #3</td><td>HVAC Fan Speed Sensor Fault</td><td>42 Mins</td><td>$0.00 (Within Buffer)</td><td><span style="color:var(--emerald-400);">Resolved</span></td></tr>
               <tr><td style="color:#fff; font-weight:bold;">#OUT-103</td><td>PV Inverter #8</td><td>Grid High Voltage Surge Trip</td><td>42 Mins</td><td>$0.00 (Utility Grid Force Majeure)</td><td><span style="color:var(--emerald-400);">Resolved</span></td></tr>
@@ -253,14 +236,8 @@
 
           <div class="slate-card flex-1">
             <h3>Container Thermal Controls</h3>
-            <div class="form-row">
-              <label>Target Container HVAC Temp: <strong id="hvac-temp-val">22°C</strong></label>
-              <input type="range" min="15" max="30" value="22" oninput="updateHvacTemp(this.value)">
-            </div>
-            <div class="form-row">
-              <label>Max Allowed Charge Rate (C-Rate): <strong id="c-rate-val">1.2 C</strong></label>
-              <input type="range" min="0.5" max="2.5" step="0.1" value="1.2" oninput="updateCRate(this.value)">
-            </div>
+            <div class="form-row"><label>Target Container HVAC Temp: <strong id="hvac-temp-val">22°C</strong></label><input type="range" min="15" max="30" value="22" oninput="updateHvacTemp(this.value)"></div>
+            <div class="form-row"><label>Max Allowed Charge Rate (C-Rate): <strong id="c-rate-val">1.2 C</strong></label><input type="range" min="0.5" max="2.5" step="0.1" value="1.2" oninput="updateCRate(this.value)"></div>
             <button class="btn-primary-action" style="margin-top:0.5rem;" onclick="runThermalSimulation()">Run Thermal Simulation</button>
           </div>
         </div>
@@ -341,15 +318,8 @@
               <div style="font-size:1.8rem; font-weight:bold; color:var(--emerald-400); margin:0.3rem 0;">+$210.40 / MWh Net Profit</div>
               <p style="font-size:0.8rem; color:var(--slate-400);">LMP Price ($248.50) minus Battery Cycling Degradation Cost ($38.10/MWh).</p>
             </div>
-
-            <div class="form-row">
-              <label>Battery Pack CapEx Replacement Cost ($ / kWh)</label>
-              <input type="text" id="capex-cost" value="$130 / kWh" oninput="recalculateMarginalCost()">
-            </div>
-            <div class="form-row">
-              <label>Marginal Cycling Wear Cost</label>
-              <input type="text" id="marginal-wear-val" value="$38.10 / MWh" readonly>
-            </div>
+            <div class="form-row"><label>Battery Pack CapEx Replacement Cost ($ / kWh)</label><input type="text" id="capex-cost" value="$130 / kWh" oninput="recalculateMarginalCost()"></div>
+            <div class="form-row"><label>Marginal Cycling Wear Cost</label><input type="text" id="marginal-wear-val" value="$38.10 / MWh" readonly></div>
           </div>
 
           <div class="slate-card">
@@ -376,26 +346,10 @@
         </div>
 
         <div class="four-kpi-grid">
-          <div class="slate-kpi-card">
-            <span class="kpi-title">ANNUAL FULL CYCLES (EFC)</span>
-            <span class="kpi-number">312 EFC</span>
-            <span class="kpi-desc">Limit: 365 EFC / Year</span>
-          </div>
-          <div class="slate-kpi-card">
-            <span class="kpi-title">WARRANTY COMPLIANCE</span>
-            <span class="kpi-number green-text">100%</span>
-            <span class="kpi-desc">Zero Contract Violations</span>
-          </div>
-          <div class="slate-kpi-card">
-            <span class="kpi-title">MAX TEMP VIOLATIONS</span>
-            <span class="kpi-number">0</span>
-            <span class="kpi-desc">Cutoff: 45.0°C Max</span>
-          </div>
-          <div class="slate-kpi-card">
-            <span class="kpi-title">OEM AUDIT STATUS</span>
-            <span class="kpi-number cyan-text">PASSED</span>
-            <span class="kpi-desc">CATL / Tesla Verified</span>
-          </div>
+          <div class="slate-kpi-card"><span class="kpi-title">ANNUAL FULL CYCLES (EFC)</span><span class="kpi-number">312 EFC</span><span class="kpi-desc">Limit: 365 EFC / Year</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">WARRANTY COMPLIANCE</span><span class="kpi-number green-text">100%</span><span class="kpi-desc">Zero Contract Violations</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">MAX TEMP VIOLATIONS</span><span class="kpi-number">0</span><span class="kpi-desc">Cutoff: 45.0°C Max</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">OEM AUDIT STATUS</span><span class="kpi-number cyan-text">PASSED</span><span class="kpi-desc">CATL / Tesla Verified</span></div>
         </div>
 
         <div class="slate-card">
@@ -433,10 +387,7 @@
                 <option>P3 - Routine Inspection</option>
               </select>
             </div>
-            <div class="form-row">
-              <label>Technician Assignment</label>
-              <input type="text" id="wo-tech" value="Lead Tech Mark Vance (Salesforce Sync)">
-            </div>
+            <div class="form-row"><label>Technician Assignment</label><input type="text" id="wo-tech" value="Lead Tech Mark Vance (Salesforce Sync)"></div>
             <button class="btn-primary-action" onclick="dispatchWorkOrder()">Dispatch Work Order via Salesforce</button>
           </div>
 
@@ -464,19 +415,13 @@
           <div class="slate-card">
             <div class="agent-head">
               <span class="agent-avatar">🛡️</span>
-              <div>
-                <h4>The Operator</h4>
-                <span class="agent-role">Operations & Thermal Specialist</span>
-              </div>
+              <div><h4>The Operator</h4><span class="agent-role">Operations & Thermal Specialist</span></div>
               <span class="online-tag">ONLINE</span>
             </div>
             <p class="agent-desc">Monitors container thermal runaway markers, cell voltage delta, and HVAC cooling loops.</p>
             <div class="agent-toggle-row">
               <span class="agent-rule-text">Rule: Cell Temp > 40°C ➔ Curtail</span>
-              <label class="toggle-switch">
-                <input type="checkbox" checked onchange="toggleAgentRule('Operator', this.checked)">
-                <span class="slider"></span>
-              </label>
+              <label class="toggle-switch"><input type="checkbox" checked onchange="toggleAgentRule('Operator', this.checked)"><span class="slider"></span></label>
             </div>
             <button class="btn-agent-test" onclick="testAgentPrompt('Operator')">Execute Diagnostics Test</button>
           </div>
@@ -484,19 +429,13 @@
           <div class="slate-card">
             <div class="agent-head">
               <span class="agent-avatar">📊</span>
-              <div>
-                <h4>The Analyst</h4>
-                <span class="agent-role">Quant & Arbitrage Specialist</span>
-              </div>
+              <div><h4>The Analyst</h4><span class="agent-role">Quant & Arbitrage Specialist</span></div>
               <span class="online-tag">ONLINE</span>
             </div>
             <p class="agent-desc">Runs 5-minute locational marginal pricing (LMP) forecasts across ERCOT & CAISO nodes.</p>
             <div class="agent-toggle-row">
               <span class="agent-rule-text">Rule: LMP > $150/MWh ➔ Discharge</span>
-              <label class="toggle-switch">
-                <input type="checkbox" checked onchange="toggleAgentRule('Analyst', this.checked)">
-                <span class="slider"></span>
-              </label>
+              <label class="toggle-switch"><input type="checkbox" checked onchange="toggleAgentRule('Analyst', this.checked)"><span class="slider"></span></label>
             </div>
             <button class="btn-agent-test" onclick="testAgentPrompt('Analyst')">Run ERCOT Market Forecast</button>
           </div>
@@ -504,19 +443,13 @@
           <div class="slate-card">
             <div class="agent-head">
               <span class="agent-avatar">📜</span>
-              <div>
-                <h4>SLA Guardrail</h4>
-                <span class="agent-role">Legal & Compliance Enforcement</span>
-              </div>
+              <div><h4>SLA Guardrail</h4><span class="agent-role">Legal & Compliance Enforcement</span></div>
               <span class="online-tag">ONLINE</span>
             </div>
             <p class="agent-desc">Audits annual full cycle counts against Tesla/CATL OEM warranty boundaries.</p>
             <div class="agent-toggle-row">
               <span class="agent-rule-text">Rule: Cycles > 365 ➔ Cap Depth</span>
-              <label class="toggle-switch">
-                <input type="checkbox" checked onchange="toggleAgentRule('Guardrail', this.checked)">
-                <span class="slider"></span>
-              </label>
+              <label class="toggle-switch"><input type="checkbox" checked onchange="toggleAgentRule('Guardrail', this.checked)"><span class="slider"></span></label>
             </div>
             <button class="btn-agent-test" onclick="testAgentPrompt('Guardrail')">Audit Megapack Warranty</button>
           </div>
@@ -551,7 +484,7 @@
           <div class="slate-kpi-card"><span class="kpi-title">CONNECTED</span><span class="kpi-number" id="int-kpi-connected">2</span><span class="kpi-desc">Apps that have actually completed auth.</span></div>
           <div class="slate-kpi-card"><span class="kpi-title">READY FOR AGENT USE</span><span class="kpi-number">2</span><span class="kpi-desc">Connected, scoped, tools exposed, and smoke tested.</span></div>
           <div class="slate-kpi-card"><span class="kpi-title">NEEDS REPAIR</span><span class="kpi-number">0</span><span class="kpi-desc">Reconnect or approve access before an agent relies on it.</span></div>
-          <div class="slate-kpi-card"><span class="kpi-title">LIVE IMPORTS</span><span class="kpi-number">3</span><span class="kpi-desc">Sheets and files already mapped into workspace screens.</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">LIVE IMPORTS</span><span class="kpi-number" id="int-kpi-imports">3</span><span class="kpi-desc">Sheets and files already mapped into workspace screens.</span></div>
         </div>
 
         <div class="integrations-group">

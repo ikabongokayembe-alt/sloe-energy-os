@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLOE Energy OS | Utility-Scale BESS & PV Agentic Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="mode-contracted">
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-badge">
+        <span class="logo-icon">⚡</span>
+        <div class="logo-text">
+          <span class="logo-title">SLOE ENERGY</span>
+          <span class="logo-sub">AGENTIC OS v2.4</span>
+        </div>
+      </div>
+      <div class="status-indicator">
+        <span class="status-dot pulsing"></span>
+        <span class="status-text">LIVE GRID TELEMETRY</span>
+      </div>
+    </div>
+
+    <!-- Mode Selector Dropdown / Pills -->
+    <div class="mode-selector-container">
+      <span class="selector-label">OPERATIONAL LENS:</span>
+      <div class="mode-pills">
+        <button class="mode-btn active" id="btn-mode-contracted" onclick="switchMode('CONTRACTED_OPS')">
+          <span class="mode-icon">📜</span>
+          <span class="mode-title">Contracted Ops</span>
+          <span class="mode-sub">PPA & Tolling SLA</span>
+        </button>
+        <button class="mode-btn" id="btn-mode-merchant" onclick="switchMode('MERCHANT_MARKET')">
+          <span class="mode-icon">📈</span>
+          <span class="mode-title">Merchant Market</span>
+          <span class="mode-sub">Wholesale Spot Bids</span>
+        </button>
+        <button class="mode-btn" id="btn-mode-unified" onclick="switchMode('UNIFIED')">
+          <span class="mode-icon">🌐</span>
+          <span class="mode-title">Unified Enterprise</span>
+          <span class="mode-sub">Portfolio C-Suite</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="btn-agent-toggle" id="btn-toggle-agent-drawer" onclick="toggleAgentDrawer()">
+        <span class="bot-sparkle">✨</span>
+        <span>SLOE AGENT SUITE</span>
+        <span class="badge-count" id="agent-active-count">3 Active</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <main class="main-container">
+
+    <!-- Mode Banner Description -->
+    <div class="mode-banner" id="mode-banner">
+      <div class="banner-content">
+        <h2 id="banner-title">📜 Contracted Asset Operations Mode</h2>
+        <p id="banner-desc">Focusing on Availability SLAs, Thermal Envelope Safety, State of Health (SoH) Fade Curves, and OEM Warranty Limits.</p>
+      </div>
+      <div class="banner-stats">
+        <div class="banner-stat-box">
+          <span class="stat-label" id="banner-kpi1-label">AVAILABILITY SLA</span>
+          <span class="stat-val positive" id="banner-kpi1-val">99.8%</span>
+        </div>
+        <div class="banner-stat-box">
+          <span class="stat-label" id="banner-kpi2-label">SYSTEM SOH</span>
+          <span class="stat-val" id="banner-kpi2-val">97.4%</span>
+        </div>
+        <div class="banner-stat-box">
+          <span class="stat-label" id="banner-kpi3-label">ACTIVE ALERTS</span>
+          <span class="stat-val warning" id="banner-kpi3-val">2 Warnings</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Grid Layout -->
+    <div class="dashboard-grid">
+
+      <!-- Column 1: Live Hardware / Market Telemetry Chart -->
+      <section class="card chart-card flex-2">
+        <div class="card-header">
+          <div class="card-header-title">
+            <span class="card-icon" id="chart-card-icon">📉</span>
+            <h3 id="chart-card-title">Fleet Battery Health & Degradation Fade Curve</h3>
+          </div>
+          <div class="card-header-actions">
+            <span class="live-tag" id="chart-live-tag">SCADA Live (50ms)</span>
+            <select class="time-select" id="time-range-select">
+              <option>Real-Time (5m)</option>
+              <option>24 Hours</option>
+              <option>7 Days</option>
+              <option>Annual Horizon</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="primaryChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Column 2: Secondary Metric & Heatmap Panel -->
+      <section class="card flex-1">
+        <div class="card-header">
+          <div class="card-header-title">
+            <span class="card-icon" id="secondary-card-icon">🔥</span>
+            <h3 id="secondary-card-title">BESS Container Thermal Heatmap</h3>
+          </div>
+          <span class="badge" id="secondary-badge">12 Containers</span>
+        </div>
+        <div class="secondary-panel-content" id="secondary-panel-content">
+          <!-- Dynamic heatmap or bidding ladder will render here -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Lower Row Grid -->
+    <div class="dashboard-grid lower-grid">
+
+      <!-- Work Orders / Bidding Executions Table -->
+      <section class="card flex-2">
+        <div class="card-header">
+          <div class="card-header-title">
+            <span class="card-icon" id="table-card-icon">🛠️</span>
+            <h3 id="table-card-title">Autonomous O&M Work Orders & Field Dispatch</h3>
+          </div>
+          <button class="btn-sm btn-primary" onclick="simulateNewEvent()">+ Simulate Event</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="main-data-table">
+            <thead>
+              <tr id="table-head-row">
+                <th>Ticket ID</th>
+                <th>Asset Unit</th>
+                <th>Diagnostic Trigger</th>
+                <th>Agent Recommendation</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Dynamically Populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Agent Activity Stream & Logs -->
+      <section class="card flex-1">
+        <div class="card-header">
+          <div class="card-header-title">
+            <span class="card-icon">🤖</span>
+            <h3>Agent Decision Log</h3>
+          </div>
+          <span class="pulse-tag">Autonomous</span>
+        </div>
+        <div class="log-stream" id="agent-log-stream">
+          <!-- Agent logs populated dynamically -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Interactive Slide-Out Agent Drawer -->
+  <aside class="agent-drawer" id="agent-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span class="sparkle-icon">✨</span>
+        <div>
+          <h3>SLOE Multi-Agent Suite</h3>
+          <p id="drawer-sub">Active Lens: Contracted Asset Ops</p>
+        </div>
+      </div>
+      <button class="btn-close-drawer" onclick="toggleAgentDrawer()">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Agent Persona 1 -->
+      <div class="agent-card active" id="agent-card-1">
+        <div class="agent-card-header">
+          <div class="agent-avatar" id="agent-avatar-1">🛡️</div>
+          <div class="agent-info">
+            <h4 id="agent-name-1">Battery Physics & Health Agent</h4>
+            <span class="agent-role" id="agent-role-1">Continuous SCADA Telemetry Guardrail</span>
+          </div>
+          <span class="agent-status-badge online">ACTIVE</span>
+        </div>
+        <p class="agent-desc" id="agent-desc-1">Monitors cell voltage delta, thermal runaway markers, and state-of-health fade rates.</p>
+        <div class="agent-last-action" id="agent-action-1">
+          <strong>Latest Decision:</strong> Auto-curtailed Rack #7 charging due to 3.8°C thermal anomaly.
+        </div>
+      </div>
+
+      <!-- Agent Persona 2 -->
+      <div class="agent-card" id="agent-card-2">
+        <div class="agent-card-header">
+          <div class="agent-avatar" id="agent-avatar-2">📜</div>
+          <div class="agent-info">
+            <h4 id="agent-name-2">SLA & OEM Warranty Guardrail</h4>
+            <span class="agent-role" id="agent-role-2">Legal & Operating Boundary Enforcement</span>
+          </div>
+          <span class="agent-status-badge online">ACTIVE</span>
+        </div>
+        <p class="agent-desc" id="agent-desc-2">Audits operational throughput against CATL/Tesla Megapack warranty contracts.</p>
+        <div class="agent-last-action" id="agent-action-2">
+          <strong>Latest Decision:</strong> Verified 99.8% Availability SLA status for Q3 utility compliance reporting.
+        </div>
+      </div>
+
+      <!-- Agent Persona 3 -->
+      <div class="agent-card" id="agent-card-3">
+        <div class="agent-card-header">
+          <div class="agent-avatar" id="agent-avatar-3">🔧</div>
+          <div class="agent-info">
+            <h4 id="agent-name-3">Autonomous Field Dispatch Agent</h4>
+            <span class="agent-role" id="agent-role-3">O&M Technician & Parts Logistics</span>
+          </div>
+          <span class="agent-status-badge online">ACTIVE</span>
+        </div>
+        <p class="agent-desc" id="agent-desc-3">Automatically generates diagnostic tickets, checks inventory, and schedules field dispatch.</p>
+        <div class="agent-last-action" id="agent-action-3">
+          <strong>Latest Decision:</strong> Issued Work Order #WO-8902 for Inverter #3 fan replacement.
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Command Input Bar -->
+    <div class="drawer-footer">
+      <div class="agent-prompt-box">
+        <input type="text" id="agent-prompt-input" placeholder="Ask SLOE Agent to analyze or execute action..." onkeypress="handleAgentPrompt(event)">
+        <button class="btn-send-prompt" onclick="submitAgentPrompt()">➔</button>
+      </div>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>

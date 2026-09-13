@@ -13,7 +13,7 @@
 <body class="mode-contracted">
   <div class="app-shell">
     
-    <!-- EXACT SLOE OS SIDEBAR (Matching SLOE-Finance-OS codebase) -->
+    <!-- EXACT SLOE OS SIDEBAR -->
     <aside class="sidebar-nav">
       <!-- Top Brand & User Header -->
       <div class="sidebar-top-user">
@@ -26,7 +26,7 @@
 
       <!-- Domain Mode Pill -->
       <div class="domain-pill-container">
-        <div class="domain-pill-box">
+        <div class="domain-pill-box" onclick="toggleDomainModal()" style="cursor:pointer;" title="Click to switch market domain">
           <span class="domain-label">Workspace:</span>
           <span class="domain-badge" id="domain-badge-text">CONTRACTED MODE</span>
         </div>
@@ -58,17 +58,13 @@
         <!-- OPERATIONS (Dynamic per Market Mode) -->
         <div class="nav-group">
           <div class="section-title">OPERATIONS</div>
-          <div id="dynamic-ops-nav">
-            <!-- Populated dynamically based on domain mode -->
-          </div>
+          <div id="dynamic-ops-nav"></div>
         </div>
 
         <!-- GROWTH & COMPLIANCE (Dynamic per Market Mode) -->
         <div class="nav-group">
           <div class="section-title">GROWTH & COMPLIANCE</div>
-          <div id="dynamic-growth-nav">
-            <!-- Populated dynamically based on domain mode -->
-          </div>
+          <div id="dynamic-growth-nav"></div>
         </div>
 
         <!-- SYSTEMS -->
@@ -101,31 +97,31 @@
     <!-- MAIN WORKSPACE CONTAINER -->
     <main class="workspace-main">
       
-      <!-- TOPBAR HEADER (Matching SLOE-Finance-OS TopBar.tsx) -->
+      <!-- TOPBAR HEADER -->
       <header class="workspace-topbar">
         <div class="topbar-search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Search records, SCADA telemetry, work orders..." onkeyup="handleGlobalSearch(event)">
+          <input type="text" id="global-search-input" placeholder="Search records, SCADA telemetry, work orders..." onkeyup="handleGlobalSearch(event)">
         </div>
 
         <div class="topbar-actions">
-          <!-- Domain Switcher Modal Button -->
+          <!-- Domain Switcher Button -->
           <button class="btn-domain-toggle" onclick="toggleDomainModal()">
             <span class="domain-toggle-icon">🔄</span>
             <span id="domain-toggle-label">Switch to Merchant Market</span>
           </button>
           <button class="btn-action-pill" onclick="navigateTo('integrations')">🔌 Composio Status</button>
-          <span class="data-status-badge">⚡ SCADA Telemetry Live</span>
+          <span class="data-status-badge" id="scada-status-pill">⚡ SCADA Telemetry Live</span>
         </div>
       </header>
 
-      <!-- SCREEN 1: TODAY / COMMAND CENTER (HitlMorningActionQueue pattern) -->
+      <!-- SCREEN 1: TODAY / COMMAND CENTER -->
       <div class="view-screen active" id="view-today">
         
         <!-- Dev Preview Banner -->
         <div class="dev-preview-banner">
           <span class="banner-warn-icon">⚠️</span>
-          <p>Development preview. SCADA telemetry feeds, BESS container sensors, and wholesale ERCOT/CAISO market gateways active. Live execution enabled.</p>
+          <p id="dev-banner-text">Development preview. SCADA telemetry feeds, BESS container sensors, and wholesale ERCOT/CAISO market gateways active. Live execution enabled.</p>
         </div>
 
         <!-- Today Hero Section -->
@@ -138,7 +134,7 @@
               </div>
               <p id="today-hero-desc">Live exception queue & telemetry-backed monitoring across utility-scale solar and BESS containers.</p>
             </div>
-            <button class="btn-primary-action" onclick="simulateEvent()">Review data requirements</button>
+            <button class="btn-primary-action" onclick="simulateEvent()">+ Trigger Telemetry Alert</button>
           </div>
         </div>
 
@@ -151,22 +147,22 @@
             <p class="card-subtext">Complete these steps before relying on daily operational dispatches.</p>
             
             <div class="setup-steps-list">
-              <div class="setup-step done">
-                <span class="step-check">✓</span>
+              <div class="setup-step done" id="step-1" onclick="toggleStep(1)">
+                <span class="step-check" id="check-1">✓</span>
                 <div>
                   <strong>Account active</strong>
                   <p>Your identity and asset workspace profile loaded.</p>
                 </div>
               </div>
-              <div class="setup-step done">
-                <span class="step-check">✓</span>
+              <div class="setup-step done" id="step-2" onclick="toggleStep(2)">
+                <span class="step-check" id="check-2">✓</span>
                 <div>
                   <strong>Add a trusted data source</strong>
                   <p>Modbus SCADA & ERCOT Market Gateways connected.</p>
                 </div>
               </div>
-              <div class="setup-step">
-                <span class="step-circle">○</span>
+              <div class="setup-step" id="step-3" onclick="toggleStep(3)">
+                <span class="step-circle" id="check-3">○</span>
                 <div>
                   <strong>Review the first evidence-backed result</strong>
                   <p>Verified thermal stability & warranty cycle limits.</p>
@@ -208,24 +204,15 @@
                 <p class="card-subtext">Evidence-backed exceptions requiring a human decision, ordered by severity and deadline.</p>
               </div>
             </div>
-            <button class="btn-refresh" onclick="renderTableData()">↻ Refresh</button>
+            <button class="btn-refresh" onclick="renderTableData()">↻ Refresh Queue</button>
           </div>
 
           <div class="queue-table-container">
             <table class="queue-table">
               <thead>
-                <tr id="queue-table-head">
-                  <th>Exception ID</th>
-                  <th>Asset Unit</th>
-                  <th>Trigger Category</th>
-                  <th>Agent Recommendation</th>
-                  <th>Severity</th>
-                  <th>Action</th>
-                </tr>
+                <tr id="queue-table-head"></tr>
               </thead>
-              <tbody id="queue-table-body">
-                <!-- Dynamically Populated -->
-              </tbody>
+              <tbody id="queue-table-body"></tbody>
             </table>
           </div>
         </div>
@@ -235,7 +222,14 @@
       <!-- SCREEN 2: OPERATIONS WORKSPACE -->
       <div class="view-screen" id="view-operations">
         <div class="ops-page-header">
-          <h2 id="ops-page-title">Operations & Telemetry</h2>
+          <div class="ops-header-top">
+            <h2 id="ops-page-title">Operations & Telemetry</h2>
+            <div class="chart-time-pills">
+              <button class="time-btn active" onclick="setOpsTimeframe('5m')">5m Live</button>
+              <button class="time-btn" onclick="setOpsTimeframe('24h')">24 Hours</button>
+              <button class="time-btn" onclick="setOpsTimeframe('7d')">7 Days</button>
+            </div>
+          </div>
           <p id="ops-page-sub">Real-time SCADA telemetry, battery state-of-health, and market bidding ladders.</p>
         </div>
 
@@ -243,7 +237,7 @@
           <div class="slate-card flex-2">
             <div class="card-header-row">
               <h3 id="chart-card-title">Fleet Battery Health & Degradation Fade Curve</h3>
-              <span class="status-pill green">SCADA Live (50ms)</span>
+              <span class="status-pill green" id="chart-live-badge">SCADA Live (50ms)</span>
             </div>
             <div class="chart-wrapper">
               <canvas id="opsChartCanvas"></canvas>
@@ -255,6 +249,7 @@
               <h3>BESS Thermal Container Grid</h3>
               <span class="status-pill blue">12 Racks</span>
             </div>
+            <p class="card-subtext">Click any container to inspect live cell voltage and run thermal test.</p>
             <div class="heatmap-grid" id="container-heatmap"></div>
           </div>
         </div>
@@ -264,7 +259,7 @@
       <div class="view-screen" id="view-ai-agents">
         <div class="ops-page-header">
           <h2>🤖 AI Agents Workspace</h2>
-          <p>Autonomous Agent Control Room & Execution Logs</p>
+          <p>Autonomous Agent Control Room & Execution Rule Playground</p>
         </div>
 
         <div class="agents-three-grid">
@@ -278,7 +273,14 @@
               <span class="online-tag">ONLINE</span>
             </div>
             <p class="agent-desc">Monitors container thermal runaway markers, cell voltage delta, and HVAC cooling loops.</p>
-            <div class="agent-rule-box"><strong>Rule:</strong> Cell Temp > 40°C ➔ Curtail Charge</div>
+            <div class="agent-toggle-row">
+              <span class="agent-rule-text">Rule: Cell Temp > 40°C ➔ Curtail</span>
+              <label class="toggle-switch">
+                <input type="checkbox" checked onchange="toggleAgentRule('Operator', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button class="btn-agent-test" onclick="testAgentPrompt('Operator')">Execute Diagnostics Test</button>
           </div>
 
           <div class="slate-card">
@@ -291,7 +293,14 @@
               <span class="online-tag">ONLINE</span>
             </div>
             <p class="agent-desc">Runs 5-minute locational marginal pricing (LMP) forecasts across ERCOT & CAISO nodes.</p>
-            <div class="agent-rule-box"><strong>Rule:</strong> LMP > $150/MWh ➔ Execute Discharge</div>
+            <div class="agent-toggle-row">
+              <span class="agent-rule-text">Rule: LMP > $150/MWh ➔ Discharge</span>
+              <label class="toggle-switch">
+                <input type="checkbox" checked onchange="toggleAgentRule('Analyst', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button class="btn-agent-test" onclick="testAgentPrompt('Analyst')">Run ERCOT Market Forecast</button>
           </div>
 
           <div class="slate-card">
@@ -304,12 +313,35 @@
               <span class="online-tag">ONLINE</span>
             </div>
             <p class="agent-desc">Audits annual full cycle counts against Tesla/CATL OEM warranty boundaries.</p>
-            <div class="agent-rule-box"><strong>Rule:</strong> Cycles > 365 ➔ Cap Daily Depth</div>
+            <div class="agent-toggle-row">
+              <span class="agent-rule-text">Rule: Cycles > 365 ➔ Cap Depth</span>
+              <label class="toggle-switch">
+                <input type="checkbox" checked onchange="toggleAgentRule('Guardrail', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button class="btn-agent-test" onclick="testAgentPrompt('Guardrail')">Audit Megapack Warranty</button>
           </div>
         </div>
+
+        <!-- Interactive Agent Console Stream -->
+        <div class="slate-card">
+          <div class="card-header-row">
+            <h3>Agent Execution Console & Output Stream</h3>
+            <span class="status-pill blue">Interactive REPL</span>
+          </div>
+          <div class="agent-console-box" id="agent-console-log">
+            <div class="console-line">[SYSTEM]: SLOE Agent Engine initialized. 3 Agents active on live grid stream.</div>
+          </div>
+          <div class="console-input-row">
+            <input type="text" id="console-input" placeholder="Type prompt to command agents (e.g. 'Audit Container #3 thermal fade')..." onkeypress="handleConsolePrompt(event)">
+            <button class="btn-primary-action" onclick="submitConsolePrompt()">Execute Command</button>
+          </div>
+        </div>
+
       </div>
 
-      <!-- SCREEN 4: INTEGRATIONS (EXACT MATCH SCREENSHOTS 4 & 5 - COMPOSIO) -->
+      <!-- SCREEN 4: INTEGRATIONS (COMPOSIO) -->
       <div class="view-screen" id="view-integrations">
         
         <div class="integrations-header-row">
@@ -317,20 +349,20 @@
             <h2>🔌 Integrations</h2>
             <p>Connect the apps your agent should use. Search the catalog below, connect one, and it's available to your agent immediately.</p>
           </div>
-          <button class="btn-other-source">+ Other source</button>
+          <button class="btn-other-source" onclick="openComposioModal('Custom Connector')">+ Other source</button>
         </div>
 
-        <!-- 4 KPI Stat Cards (Exact Screenshot 4) -->
+        <!-- 4 KPI Stat Cards -->
         <div class="four-kpi-grid">
           <div class="slate-kpi-card">
             <span class="kpi-title">CONNECTED</span>
-            <span class="kpi-number">2</span>
+            <span class="kpi-number" id="int-kpi-connected">2</span>
             <span class="kpi-desc">Apps that have actually completed auth.</span>
           </div>
 
           <div class="slate-kpi-card">
             <span class="kpi-title">READY FOR AGENT USE</span>
-            <span class="kpi-number">2</span>
+            <span class="kpi-number" id="int-kpi-ready">2</span>
             <span class="kpi-desc">Connected, scoped, tools exposed, and smoke tested.</span>
           </div>
 
@@ -342,12 +374,12 @@
 
           <div class="slate-kpi-card">
             <span class="kpi-title">LIVE IMPORTS</span>
-            <span class="kpi-number">0</span>
+            <span class="kpi-number" id="int-kpi-imports">3</span>
             <span class="kpi-desc">Sheets and files already mapped into workspace screens.</span>
           </div>
         </div>
 
-        <!-- Connected Integrations (Exact Screenshot 4) -->
+        <!-- Connected Integrations -->
         <div class="integrations-group">
           <h3 class="group-title">CONNECTED INTEGRATIONS (2)</h3>
           
@@ -363,8 +395,8 @@
               <span class="tag-sub-ready">🟢 Ready</span>
               <p>Connected and ready for approved agent work.</p>
               <div class="int-card-btns">
-                <button class="btn-smoke" onclick="alert('Smoke test passed!')">Smoke test</button>
-                <button class="btn-disconnect" onclick="alert('Disconnection disabled.')">✕ Disconnect</button>
+                <button class="btn-smoke" onclick="runSmokeTest('Modbus SCADA Gateway')">Smoke test</button>
+                <button class="btn-disconnect" onclick="disconnectApp('Modbus SCADA Gateway')">✕ Disconnect</button>
               </div>
             </div>
 
@@ -379,72 +411,34 @@
               <span class="tag-sub-ready">🟢 Ready</span>
               <p>Connected and ready for approved market bid execution.</p>
               <div class="int-card-btns">
-                <button class="btn-smoke" onclick="alert('Smoke test passed!')">Smoke test</button>
-                <button class="btn-disconnect" onclick="alert('Disconnection disabled.')">✕ Disconnect</button>
+                <button class="btn-smoke" onclick="runSmokeTest('ERCOT Market Gateway')">Smoke test</button>
+                <button class="btn-disconnect" onclick="disconnectApp('ERCOT Market Gateway')">✕ Disconnect</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Browse Apps Section (Exact Screenshot 5 - Composio) -->
+        <!-- Browse Apps Section (Composio Catalog) -->
         <div class="integrations-group">
           <h3 class="group-title">BROWSE APPS (COMPOSIO)</h3>
           
           <div class="composio-search-bar">
             <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Search apps...">
+            <input type="text" id="composio-search-input" placeholder="Search apps..." onkeyup="filterComposioApps()">
           </div>
 
           <div class="pills-scroll-row">
-            <button class="pill-chip active">All apps 500</button>
-            <button class="pill-chip">Energy & SCADA</button>
-            <button class="pill-chip">Wholesale Markets</button>
-            <button class="pill-chip">ERP & Field Ops</button>
-            <button class="pill-chip">Communication</button>
+            <button class="pill-chip active" id="chip-all" onclick="filterComposioCategory('all')">All apps 500</button>
+            <button class="pill-chip" id="chip-energy" onclick="filterComposioCategory('energy')">Energy & SCADA</button>
+            <button class="pill-chip" id="chip-market" onclick="filterComposioCategory('market')">Wholesale Markets</button>
+            <button class="pill-chip" id="chip-erp" onclick="filterComposioCategory('erp')">ERP & Field Ops</button>
+            <button class="pill-chip" id="chip-comm" onclick="filterComposioCategory('comm')">Communication</button>
           </div>
 
           <h4 class="featured-title">FEATURED APPS</h4>
 
-          <div class="featured-grid">
-            <div class="white-featured-card">
-              <div class="feat-icon">⚡</div>
-              <div class="feat-details">
-                <h4>Modbus TCP / SCADA</h4>
-                <span class="feat-category">ENERGY PROTOCOL</span>
-                <p>Ingests real-time cell temperatures, inverter signals, and SoC metrics.</p>
-                <span class="green-ready-text">✓ Ready</span>
-              </div>
-            </div>
-
-            <div class="white-featured-card">
-              <div class="feat-icon">📈</div>
-              <div class="feat-details">
-                <h4>CAISO OASIS API</h4>
-                <span class="feat-category">WHOLESALE MARKET</span>
-                <p>Real-time LMP prices and solar irradiance forecasting for California ISO.</p>
-                <button class="btn-connect">+ Connect</button>
-              </div>
-            </div>
-
-            <div class="white-featured-card">
-              <div class="feat-icon">💼</div>
-              <div class="feat-details">
-                <h4>Salesforce Field Service</h4>
-                <span class="feat-category">ENTERPRISE ERP</span>
-                <p>Auto-dispatches certified technicians and schedules replacement parts.</p>
-                <button class="btn-connect">+ Connect</button>
-              </div>
-            </div>
-
-            <div class="white-featured-card">
-              <div class="feat-icon">💬</div>
-              <div class="feat-details">
-                <h4>Slack Ops Alerting</h4>
-                <span class="feat-category">COMMUNICATION</span>
-                <p>Sends immediate thermal runaway alerts and daily dispatch summaries.</p>
-                <button class="btn-connect">+ Connect</button>
-              </div>
-            </div>
+          <div class="featured-grid" id="composio-featured-grid">
+            <!-- Dynamically Rendered -->
           </div>
 
         </div>
@@ -462,20 +456,41 @@
           <h3>Operating & Warranty Boundaries</h3>
           <div class="form-row">
             <label>Maximum Allowed C-Rate</label>
-            <input type="text" value="1.5 C (Continuous)">
+            <input type="text" id="cfg-crate" value="1.5 C (Continuous)">
           </div>
           <div class="form-row">
             <label>Thermal Ceiling Cutoff (°C)</label>
-            <input type="text" value="45.0 °C">
+            <input type="text" id="cfg-temp" value="45.0 °C">
+          </div>
+          <div class="form-row">
+            <label>Annual Max Full Cycles (EFC)</label>
+            <input type="text" id="cfg-cycles" value="365 Cycles / Year">
           </div>
           <div class="form-row">
             <label>Production Custom Domain</label>
             <input type="text" value="energy.sloelabs.com" readonly>
           </div>
+          <button class="btn-primary-action" style="margin-top:0.75rem;" onclick="saveSettings()">Save Settings</button>
         </div>
       </div>
 
     </main>
+  </div>
+
+  <!-- INTERACTIVE MODAL (Inspection & Composio Auth) -->
+  <div class="modal-overlay" id="app-modal" onclick="closeModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">Inspection Evidence Modal</h3>
+        <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Content inserted dynamically -->
+      </div>
+      <div class="modal-footer" id="modal-footer">
+        <button class="btn-primary-action" onclick="closeModalDirect()">Close</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>

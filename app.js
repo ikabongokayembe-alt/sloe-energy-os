@@ -1,89 +1,174 @@
-// SLOE Energy OS Core Application Logic
+// SLOE Energy OS Application Core (Matching SLOE-Finance-OS Architecture)
 
-let activeView = 'command-center';
-let currentMode = 'CONTRACTED_OPS';
-let primaryOpsChart = null;
+let activeView = 'today';
+let currentDomain = 'contracted'; // 'contracted' or 'merchant'
+let opsChartInstance = null;
+
+// Dynamic Market Navigation Configurations
+const NAV_CONFIG = {
+  contracted: {
+    domainBadge: 'CONTRACTED MODE',
+    toggleLabel: 'Switch to Merchant Market',
+    todayBadge: 'CONTRACTED ASSET OPERATIONS',
+    todayDesc: 'Live availability tracking & telemetry-backed exception queue for PPA & Tolling contracts.',
+    opsTitle: 'Availability SLA & Thermal Telemetry',
+    tool1Name: 'Availability SLA Tracker',
+    tool1Desc: 'Monitor 99.8% plant uptime & contract SLAs.',
+    tool2Name: 'Thermal Fade Engine',
+    tool2Desc: 'Audit CATL/Tesla battery degradation curves.',
+    opsNav: [
+      { id: 'sla-tracker', icon: '📊', label: 'Availability SLA Tracker' },
+      { id: 'thermal-engine', icon: '📉', label: 'Thermal & SoH Fade' }
+    ],
+    growthNav: [
+      { id: 'warranty-guardrail', icon: '📜', label: 'OEM Warranty Guardrail' },
+      { id: 'field-dispatch', icon: '🛠️', label: 'O&M Field Dispatch' }
+    ],
+    queueHead: ['Exception ID', 'Asset Unit', 'Trigger Category', 'Agent Recommendation', 'Severity', 'Action'],
+    queueRows: [
+      { id: '#EX-9081', unit: 'Container #3', trigger: 'Thermal Spike (42.1°C)', rec: 'Curtail Charge to 0.5C', sev: 'High', badge: 'High' },
+      { id: '#EX-9082', unit: 'PV Inverter #8', trigger: 'Efficiency Drop (-4.2%)', rec: 'Clean Dust Sensor & Calibrate', sev: 'Medium', badge: 'Medium' },
+      { id: '#EX-9083', unit: 'Rack #11', trigger: 'Cell Delta V > 80mV', rec: 'Run Autonomous Balancing Cycle', sev: 'Low', badge: 'Low' }
+    ]
+  },
+  merchant: {
+    domainBadge: 'MERCHANT MODE',
+    toggleLabel: 'Switch to Contracted Ops',
+    todayBadge: 'MERCHANT MARKET OPERATIONS',
+    todayDesc: 'Live 5-minute wholesale ERCOT/CAISO LMP bidding & real-time arbitrage optimization.',
+    opsTitle: 'LMP Spot Arbitrage & Cycling Margins',
+    tool1Name: '5-Min LMP Spot Radar',
+    tool1Desc: 'Capture $248.50/MWh ERCOT price spikes.',
+    tool2Name: 'Cycling Cost Engine',
+    tool2Desc: 'Calculate marginal degradation cost per cycle.',
+    opsNav: [
+      { id: 'lmp-radar', icon: '⚡', label: 'LMP Spot Arbitrage Radar' },
+      { id: 'cycling-margin', icon: '💰', label: 'Cycling Cost & Revenue' }
+    ],
+    growthNav: [
+      { id: 'quant-forecast', icon: '🌤️', label: 'ERCOT/CAISO Quant' },
+      { id: 'ppa-hedges', icon: '📜', label: 'Bilateral PPA & Hedges' }
+    ],
+    queueHead: ['Bid ID', 'Market Node', 'Volume (MW)', 'Target LMP ($)', 'Degradation Cost', 'Execution Status'],
+    queueRows: [
+      { id: '#BID-4491', unit: 'ERCOT South Zone', trigger: '25 MW (Discharge)', rec: '$248.50 / MWh Target', sev: '$38.10 / MWh', badge: 'Executed' },
+      { id: '#BID-4492', unit: 'ERCOT North Zone', trigger: '40 MW (Charge)', rec: '$18.20 / MWh Target', sev: '$38.10 / MWh', badge: 'Pending' },
+      { id: '#BID-4493', unit: 'CAISO Ancillary', trigger: '10 MW (Spin Reserve)', rec: '$45.00 / MWh Target', sev: '$12.00 / MWh', badge: 'Cleared' }
+    ]
+  }
+};
 
 // Initial Setup
 document.addEventListener('DOMContentLoaded', () => {
+  renderDynamicNav();
   renderOpsChart();
   renderHeatmap();
   renderTableData();
 });
 
-// Navigation Router
+// Router
 function navigateTo(viewId) {
   activeView = viewId;
-
-  // Update Page Title
-  const titleMap = {
-    'command-center': 'Command Center',
-    'operations': 'Operations Workspace',
-    'ai-agents': 'AI Agents Workspace',
-    'integrations': 'Integrations (Composio)',
-    'settings': 'Settings'
-  };
-
-  const pageTitle = document.getElementById('topbar-page-title');
-  if (pageTitle) pageTitle.innerText = titleMap[viewId] || 'Workspace';
-
-  // Toggle Screen Views
   document.querySelectorAll('.view-screen').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
   const targetView = document.getElementById(`view-${viewId}`);
-  const targetNav = document.getElementById(`nav-${viewId}`) || document.getElementById(`nav-bess-fleet`);
+  const targetNav = document.getElementById(`nav-${viewId}`) || document.getElementById(`nav-today`);
 
   if (targetView) targetView.classList.add('active');
   if (targetNav) targetNav.classList.add('active');
 }
 
-// Mode Selector (Contracted vs Merchant)
-function switchMode(mode) {
-  currentMode = mode;
-  document.body.className = `mode-${mode.toLowerCase()}`;
-
-  const btnContracted = document.getElementById('pill-contracted');
-  const btnMerchant = document.getElementById('pill-merchant');
-
-  if (btnContracted) btnContracted.classList.toggle('active', mode === 'CONTRACTED_OPS');
-  if (btnMerchant) btnMerchant.classList.toggle('active', mode === 'MERCHANT_MARKET');
-
-  const title = document.getElementById('ops-banner-title');
-  const desc = document.getElementById('ops-banner-desc');
-  const kpi1Label = document.getElementById('kpi1-label');
-  const kpi1Val = document.getElementById('kpi1-val');
-  const kpi2Label = document.getElementById('kpi2-label');
-  const kpi2Val = document.getElementById('kpi2-val');
-
-  if (mode === 'CONTRACTED_OPS') {
-    if (title) title.innerText = '📜 Contracted Asset Operations Mode';
-    if (desc) desc.innerText = 'Focusing on Availability SLAs, Thermal Envelope Safety, State of Health (SoH) Fade Curves, and OEM Warranty Limits.';
-    if (kpi1Label) kpi1Label.innerText = 'AVAILABILITY SLA';
-    if (kpi1Val) kpi1Val.innerText = '99.8%';
-    if (kpi2Label) kpi2Label.innerText = 'SYSTEM SOH';
-    if (kpi2Val) kpi2Val.innerText = '97.4%';
-  } else {
-    if (title) title.innerText = '📈 Merchant Market Operations Mode';
-    if (desc) desc.innerText = 'Focusing on Real-Time ERCOT/CAISO LMP Bidding, Net Arbitrage Spreads, Marginal Cycling Costs, and Quant Forecasts.';
-    if (kpi1Label) kpi1Label.innerText = 'NET ARBITRAGE SPREAD';
-    if (kpi1Val) kpi1Val.innerText = '$184.20 / MWh';
-    if (kpi2Label) kpi2Label.innerText = 'LIVE LMP PRICE';
-    if (kpi2Val) kpi2Val.innerText = '$248.50';
-  }
-
+// Toggle Domain / Market Mode (Contracted vs Merchant)
+function toggleDomainModal() {
+  currentDomain = currentDomain === 'contracted' ? 'merchant' : 'contracted';
+  document.body.className = `mode-${currentDomain}`;
+  
+  renderDynamicNav();
   updateOpsChart();
   renderTableData();
 }
 
-// Render Operations Chart
+function switchMode(modeKey) {
+  currentDomain = modeKey === 'CONTRACTED_OPS' ? 'contracted' : 'merchant';
+  toggleDomainModal();
+}
+
+// Render Dynamic Sidebar Navigation per Domain Mode
+function renderDynamicNav() {
+  const config = NAV_CONFIG[currentDomain];
+
+  // Badges & Labels
+  const domainBadge = document.getElementById('domain-badge-text');
+  const toggleLabel = document.getElementById('domain-toggle-label');
+  const todayBadge = document.getElementById('today-market-badge');
+  const todayDesc = document.getElementById('today-hero-desc');
+  const tool1Name = document.getElementById('tool1-name');
+  const tool1Desc = document.getElementById('tool1-desc');
+  const tool2Name = document.getElementById('tool2-name');
+  const tool2Desc = document.getElementById('tool2-desc');
+
+  if (domainBadge) domainBadge.innerText = config.domainBadge;
+  if (toggleLabel) toggleLabel.innerText = config.toggleLabel;
+  if (todayBadge) todayBadge.innerText = config.todayBadge;
+  if (todayDesc) todayDesc.innerText = config.todayDesc;
+  if (tool1Name) tool1Name.innerText = config.tool1Name;
+  if (tool1Desc) tool1Desc.innerText = config.tool1Desc;
+  if (tool2Name) tool2Name.innerText = config.tool2Name;
+  if (tool2Desc) tool2Desc.innerText = config.tool2Desc;
+
+  // Render Operations Sub-nav
+  const opsContainer = document.getElementById('dynamic-ops-nav');
+  if (opsContainer) {
+    opsContainer.innerHTML = config.opsNav.map(item => `
+      <button type="button" class="nav-item" onclick="navigateTo('operations')">
+        <span class="nav-icon">${item.icon}</span>
+        <span>${item.label}</span>
+      </button>
+    `).join('');
+  }
+
+  // Render Growth Sub-nav
+  const growthContainer = document.getElementById('dynamic-growth-nav');
+  if (growthContainer) {
+    growthContainer.innerHTML = config.growthNav.map(item => `
+      <button type="button" class="nav-item" onclick="navigateTo('operations')">
+        <span class="nav-icon">${item.icon}</span>
+        <span>${item.label}</span>
+      </button>
+    `).join('');
+  }
+}
+
+// Render Queue Table
+function renderTableData() {
+  const headRow = document.getElementById('queue-table-head');
+  const bodyRows = document.getElementById('queue-table-body');
+  if (!headRow || !bodyRows) return;
+
+  const config = NAV_CONFIG[currentDomain];
+  headRow.innerHTML = config.queueHead.map(h => `<th>${h}</th>`).join('');
+
+  bodyRows.innerHTML = config.queueRows.map(r => `
+    <tr>
+      <td style="font-family:var(--font-mono); font-weight:bold; color:#fff;">${r.id}</td>
+      <td>${r.unit}</td>
+      <td>${r.trigger}</td>
+      <td style="color:var(--emerald-400); font-weight:600;">${r.rec}</td>
+      <td><span style="font-size:0.72rem; color:var(--cyan-400); font-weight:bold;">${r.sev}</span></td>
+      <td><button class="btn-smoke" onclick="alert('Inspecting exception ${r.id}')">Inspect</button></td>
+    </tr>
+  `).join('');
+}
+
+// Render Ops Chart
 function renderOpsChart() {
-  const ctx = document.getElementById('primaryOpsChart')?.getContext('2d');
+  const ctx = document.getElementById('opsChartCanvas')?.getContext('2d');
   if (!ctx) return;
 
-  primaryOpsChart = new Chart(ctx, {
+  opsChartInstance = new Chart(ctx, {
     type: 'line',
-    data: getOpsChartData(currentMode),
+    data: getOpsChartData(currentDomain),
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -99,19 +184,19 @@ function renderOpsChart() {
 }
 
 function updateOpsChart() {
-  if (primaryOpsChart) {
-    primaryOpsChart.data = getOpsChartData(currentMode);
-    primaryOpsChart.update();
+  if (opsChartInstance) {
+    opsChartInstance.data = getOpsChartData(currentDomain);
+    opsChartInstance.update();
   }
 }
 
-function getOpsChartData(mode) {
+function getOpsChartData(domain) {
   const labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'];
-  if (mode === 'CONTRACTED_OPS') {
+  if (domain === 'contracted') {
     return {
       labels,
       datasets: [
-        { label: 'System SoH (%)', data: [98.5, 98.4, 98.1, 97.9, 97.6, 97.4, 97.4], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true },
+        { label: 'System SoH (%)', data: [98.5, 98.4, 98.1, 97.9, 97.6, 97.4, 97.4], borderColor: '#10b981', fill: true, backgroundColor: 'rgba(16,185,129,0.1)' },
         { label: 'OEM Warranty Ceiling', data: [95, 95, 95, 95, 95, 95, 95], borderColor: '#ef4444', borderDash: [5, 5] }
       ]
     };
@@ -119,14 +204,14 @@ function getOpsChartData(mode) {
     return {
       labels,
       datasets: [
-        { label: 'Real-Time LMP ($/MWh)', data: [22, 18, 45, 12, 180, 248, 65], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.15)', fill: true }
+        { label: 'Real-Time LMP ($/MWh)', data: [22, 18, 45, 12, 180, 248, 65], borderColor: '#3b82f6', fill: true, backgroundColor: 'rgba(59,130,246,0.15)' }
       ]
     };
   }
 }
 
 function renderHeatmap() {
-  const container = document.getElementById('heatmap-grid');
+  const container = document.getElementById('container-heatmap');
   if (!container) return;
   container.innerHTML = '';
 
@@ -134,7 +219,7 @@ function renderHeatmap() {
     const temp = (34 + Math.random() * 8).toFixed(1);
     const soc = Math.floor(40 + Math.random() * 55);
     const cell = document.createElement('div');
-    cell.style.cssText = 'background:#080a0f; border:1px solid #161b26; padding:0.5rem; border-radius:6px; font-size:0.75rem;';
+    cell.style.cssText = 'background:#020617; border:1px solid #1e293b; padding:0.5rem; border-radius:6px; font-size:0.75rem;';
     cell.innerHTML = `
       <div style="color:#94a3b8; display:flex; justify-content:space-between;">
         <span>BESS #${i}</span>
@@ -146,52 +231,16 @@ function renderHeatmap() {
   }
 }
 
-function renderTableData() {
-  const headers = document.getElementById('table-headers');
-  const rows = document.getElementById('table-rows');
-  if (!headers || !rows) return;
-
-  if (currentMode === 'CONTRACTED_OPS') {
-    headers.innerHTML = `<th>Ticket ID</th><th>Asset Unit</th><th>Diagnostic Trigger</th><th>Agent Action</th><th>Status</th>`;
-    rows.innerHTML = `
-      <tr>
-        <td style="font-weight:bold; color:#fff;">#WO-9081</td>
-        <td>Container #3</td>
-        <td>Thermal Spike (42.1°C)</td>
-        <td style="color:#10b981;">Curtail Charge to 0.5C</td>
-        <td><span style="color:#3b82f6;">Active</span></td>
-      </tr>
-      <tr>
-        <td style="font-weight:bold; color:#fff;">#WO-9082</td>
-        <td>PV Inverter #8</td>
-        <td>Efficiency Drop (-4.2%)</td>
-        <td style="color:#10b981;">Calibrate Dust Sensor</td>
-        <td><span style="color:#f59e0b;">Scheduled</span></td>
-      </tr>
-    `;
-  } else {
-    headers.innerHTML = `<th>Bid ID</th><th>Market Node</th><th>Volume (MW)</th><th>Target LMP ($)</th><th>Status</th>`;
-    rows.innerHTML = `
-      <tr>
-        <td style="font-weight:bold; color:#fff;">#BID-4491</td>
-        <td>ERCOT South Zone</td>
-        <td>25 MW (Discharge)</td>
-        <td style="color:#10b981;">$248.50 / MWh</td>
-        <td><span style="color:#10b981;">Executed</span></td>
-      </tr>
-      <tr>
-        <td style="font-weight:bold; color:#fff;">#BID-4492</td>
-        <td>ERCOT North Zone</td>
-        <td>40 MW (Charge)</td>
-        <td style="color:#10b981;">$18.20 / MWh</td>
-        <td><span style="color:#3b82f6;">Pending</span></td>
-      </tr>
-    `;
-  }
+function simulateEvent() {
+  alert('Simulating SCADA telemetry event: Thermal imbalance detected in BESS Rack #4. Work order generated.');
 }
 
 function handleGlobalSearch(e) {
   if (e.key === 'Enter') {
-    alert(`Searching Sloe Energy OS for: "${e.target.value}"`);
+    alert(`Searching Sloe Energy OS records for: "${e.target.value}"`);
   }
+}
+
+function toggleUserMenu() {
+  alert('Demo Test (sloelabs.com) - Enterprise Asset Principal');
 }

@@ -1,11 +1,12 @@
-// SLOE Energy OS Interactive Multi-Screen Application Core
+// SLOE Energy OS Dedicated Tool Workspaces & Application Logic
 
 let activeView = 'today';
-let currentDomain = 'contracted'; // 'contracted' or 'merchant'
-let opsChartInstance = null;
+let currentDomain = 'contracted';
+let degradationChartInstance = null;
+let arbitrageChartInstance = null;
 let currentCategory = 'all';
 
-// Composio Apps Catalog
+// Composio Catalog
 const COMPOSIO_CATALOG = [
   { name: 'Modbus TCP / SCADA', cat: 'energy', catLabel: 'ENERGY PROTOCOL', icon: '⚡', desc: 'Ingests real-time cell temperatures, inverter signals, and SoC metrics.', ready: true },
   { name: 'CAISO OASIS API', cat: 'market', catLabel: 'WHOLESALE MARKET', icon: '📈', desc: 'Real-time LMP prices and solar irradiance forecasting for California ISO.', ready: false },
@@ -15,7 +16,7 @@ const COMPOSIO_CATALOG = [
   { name: 'IBM Maximo Asset Mgmt', cat: 'erp', catLabel: 'ENTERPRISE ERP', icon: '🏗️', desc: 'Syncs SLA availability penalty metrics and long-term asset health records.', ready: false }
 ];
 
-// Market Domain Configurations
+// Market Domain Navigation Structure
 const NAV_CONFIG = {
   contracted: {
     domainBadge: 'CONTRACTED MODE',
@@ -27,12 +28,12 @@ const NAV_CONFIG = {
     tool2Name: 'Thermal Fade Engine',
     tool2Desc: 'Audit CATL/Tesla battery degradation curves.',
     opsNav: [
-      { id: 'sla-tracker', icon: '📊', label: 'Availability SLA Tracker' },
-      { id: 'thermal-engine', icon: '📉', label: 'Thermal & SoH Fade' }
+      { id: 'tool-sla', icon: '📊', label: 'Availability SLA Tracker' },
+      { id: 'tool-degradation', icon: '📉', label: 'Thermal & SoH Fade' }
     ],
     growthNav: [
-      { id: 'warranty-guardrail', icon: '📜', label: 'OEM Warranty Guardrail' },
-      { id: 'field-dispatch', icon: '🛠️', label: 'O&M Field Dispatch' }
+      { id: 'tool-warranty', icon: '📜', label: 'OEM Warranty Guardrail' },
+      { id: 'tool-dispatch', icon: '🛠️', label: 'O&M Field Dispatch' }
     ],
     queueHead: ['Exception ID', 'Asset Unit', 'Trigger Category', 'Agent Recommendation', 'Severity', 'Action'],
     queueRows: [
@@ -51,8 +52,8 @@ const NAV_CONFIG = {
     tool2Name: 'Cycling Cost Engine',
     tool2Desc: 'Calculate marginal degradation cost per cycle.',
     opsNav: [
-      { id: 'lmp-radar', icon: '⚡', label: 'LMP Spot Arbitrage Radar' },
-      { id: 'cycling-margin', icon: '💰', label: 'Cycling Cost & Revenue' }
+      { id: 'tool-arbitrage', icon: '⚡', label: 'LMP Spot Arbitrage Radar' },
+      { id: 'tool-cycling', icon: '💰', label: 'Cycling Cost & Revenue' }
     ],
     growthNav: [
       { id: 'quant-forecast', icon: '🌤️', label: 'ERCOT/CAISO Quant' },
@@ -70,15 +71,17 @@ const NAV_CONFIG = {
 // Initial Setup
 document.addEventListener('DOMContentLoaded', () => {
   renderDynamicNav();
-  renderOpsChart();
-  renderHeatmap();
   renderTableData();
   renderComposioFeatured();
+  renderDegradationChart();
+  renderArbitrageChart();
+  renderThermalHeatmap();
 });
 
-// Router
+// Router supporting dedicated tool screens
 function navigateTo(viewId) {
   activeView = viewId;
+
   document.querySelectorAll('.view-screen').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
@@ -87,15 +90,21 @@ function navigateTo(viewId) {
 
   if (targetView) targetView.classList.add('active');
   if (targetNav) targetNav.classList.add('active');
+
+  // Trigger chart resizes if navigating into a chart workspace
+  if (viewId === 'tool-degradation' && degradationChartInstance) {
+    setTimeout(() => degradationChartInstance.resize(), 100);
+  }
+  if (viewId === 'tool-arbitrage' && arbitrageChartInstance) {
+    setTimeout(() => arbitrageChartInstance.resize(), 100);
+  }
 }
 
 // Domain Switcher
 function toggleDomainModal() {
   currentDomain = currentDomain === 'contracted' ? 'merchant' : 'contracted';
   document.body.className = `mode-${currentDomain}`;
-  
   renderDynamicNav();
-  updateOpsChart();
   renderTableData();
 }
 
@@ -112,14 +121,14 @@ function renderDynamicNav() {
   document.getElementById('tool2-desc').innerText = config.tool2Desc;
 
   document.getElementById('dynamic-ops-nav').innerHTML = config.opsNav.map(item => `
-    <button type="button" class="nav-item" onclick="navigateTo('operations')">
+    <button type="button" class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
       <span class="nav-icon">${item.icon}</span>
       <span>${item.label}</span>
     </button>
   `).join('');
 
   document.getElementById('dynamic-growth-nav').innerHTML = config.growthNav.map(item => `
-    <button type="button" class="nav-item" onclick="navigateTo('operations')">
+    <button type="button" class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
       <span class="nav-icon">${item.icon}</span>
       <span>${item.label}</span>
     </button>
@@ -146,6 +155,134 @@ function renderTableData() {
   `).join('');
 }
 
+// 📊 TOOL 1: AVAILABILITY SLA TRACKER FUNCTIONS
+function downloadSlaReport() {
+  alert('Generating & downloading SEC & Utility PPA Availability Compliance Memo (PDF)... Verified 99.82% Uptime.');
+  appendConsoleLine('[SLA TOOL]: Downloaded stamped Availability Compliance Memo (PDF).', 'action');
+}
+
+// 📉 TOOL 2: THERMAL FADE ENGINE FUNCTIONS
+function renderDegradationChart() {
+  const ctx = document.getElementById('degradationChartCanvas')?.getContext('2d');
+  if (!ctx) return;
+
+  degradationChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Yr 1', 'Yr 3', 'Yr 5', 'Yr 7', 'Yr 10', 'Yr 12', 'Yr 15'],
+      datasets: [
+        { label: 'Projected SoH Capacity (%)', data: [99.2, 97.4, 94.8, 91.2, 86.5, 82.1, 78.4], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true },
+        { label: 'CATL 70% End-of-Life Limit', data: [70, 70, 70, 70, 70, 70, 70], borderColor: '#ef4444', borderDash: [5, 5] }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } }
+    }
+  });
+}
+
+function updateHvacTemp(val) {
+  document.getElementById('hvac-temp-val').innerText = `${val}°C`;
+}
+
+function updateCRate(val) {
+  document.getElementById('c-rate-val').innerText = `${val} C`;
+}
+
+function runThermalSimulation() {
+  const temp = document.getElementById('hvac-temp-val').innerText;
+  const crate = document.getElementById('c-rate-val').innerText;
+  alert(`Running thermal simulation with HVAC ${temp} & C-Rate ${crate}... Degradation rate optimized!`);
+  appendConsoleLine(`[THERMAL SIMULATOR]: Re-calculated cell degradation curve with ${temp} HVAC cooling.`, 'action');
+}
+
+function renderThermalHeatmap() {
+  const container = document.getElementById('degradation-heatmap-grid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  for (let i = 1; i <= 12; i++) {
+    const temp = (34 + Math.random() * 6).toFixed(1);
+    const soc = Math.floor(45 + Math.random() * 50);
+    const cell = document.createElement('div');
+    cell.style.cssText = 'background:#020617; border:1px solid #1e293b; padding:0.6rem; border-radius:6px; font-size:0.75rem; cursor:pointer;';
+    cell.onclick = () => alert(`BESS Rack #${i}: Temp ${temp}°C, SoC ${soc}%. Cell voltage delta 14mV.`);
+    cell.innerHTML = `
+      <div style="color:#94a3b8; display:flex; justify-content:space-between;"><span>BESS #${i}</span><span>${soc}%</span></div>
+      <div style="color:#10b981; font-weight:bold; font-size:0.95rem; margin-top:0.2rem;">${temp}°C</div>
+    `;
+    container.appendChild(cell);
+  }
+}
+
+// ⚡ TOOL 3: LMP SPOT ARBITRAGE RADAR FUNCTIONS
+function renderArbitrageChart() {
+  const ctx = document.getElementById('arbitrageChartCanvas')?.getContext('2d');
+  if (!ctx) return;
+
+  arbitrageChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+      datasets: [
+        { label: 'ERCOT South Real-Time LMP ($/MWh)', data: [18.2, 14.5, 88.0, 248.5, 175.0, 42.0], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.15)', fill: true }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } }
+    }
+  });
+}
+
+function submitMarketBid() {
+  const node = document.getElementById('bid-node').value;
+  const type = document.getElementById('bid-type').value;
+  const volume = document.getElementById('bid-volume').value;
+  
+  const tbody = document.getElementById('bidding-stack-tbody');
+  if (tbody) {
+    const tr = document.createElement('tr');
+    const id = `#BID-${Math.floor(1000 + Math.random() * 9000)}`;
+    tr.innerHTML = `<td style="color:#fff; font-weight:bold;">${id}</td><td>${type}</td><td>${volume} MW</td><td style="color:var(--emerald-400);">${node.split('(')[1]?.replace(')', '') || '$200/MWh'}</td><td><span style="color:var(--amber-500);">Submitted</span></td>`;
+    tbody.insertBefore(tr, tbody.firstChild);
+  }
+
+  alert(`Submitted 5-Min Wholesale Bid: ${volume} MW (${type}) at ${node}!`);
+  appendConsoleLine(`[MARKET BID]: Submitted ${volume} MW bid for ${node}.`, 'action');
+}
+
+// 💰 TOOL 4: CYCLING COST & REVENUE FUNCTIONS
+function recalculateMarginalCost() {
+  const capex = document.getElementById('capex-cost').value;
+  appendConsoleLine(`[MARGINAL COST]: Recalculating degradation wear cost for CapEx ${capex}...`, 'line');
+}
+
+// 📜 TOOL 5: OEM WARRANTY AUDITOR FUNCTIONS
+function downloadWarrantyPackage() {
+  alert('Generating & downloading Cryptographically Stamped OEM Warranty Compliance Audit Package (PDF)...');
+  appendConsoleLine('[WARRANTY AUDITOR]: Exported OEM Warranty Audit Package (PDF).', 'action');
+}
+
+// 🛠️ TOOL 6: O&M FIELD DISPATCH FUNCTIONS
+function dispatchWorkOrder() {
+  const unit = document.getElementById('wo-unit').value;
+  const priority = document.getElementById('wo-priority').value;
+  const tech = document.getElementById('wo-tech').value;
+  const id = `#WO-${Math.floor(9000 + Math.random() * 999)}`;
+
+  const tbody = document.getElementById('dispatch-tbody');
+  if (tbody) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="color:#fff; font-weight:bold;">${id}</td><td>${unit}</td><td>${priority}</td><td>${tech}</td><td><span style="color:var(--amber-500);">Dispatched</span></td>`;
+    tbody.insertBefore(tr, tbody.firstChild);
+  }
+
+  alert(`Dispatched Work Order ${id} to ${tech} via Salesforce Field Service!`);
+  appendConsoleLine(`[FIELD DISPATCH]: Work Order ${id} dispatched via Salesforce API.`, 'action');
+}
+
 // Inspection Evidence Modal
 function inspectException(id, unit, trigger, rec) {
   const modal = document.getElementById('app-modal');
@@ -163,83 +300,39 @@ function inspectException(id, unit, trigger, rec) {
       <strong style="color:#fff;">Agent Assessment:</strong>
       <p style="margin-top:0.25rem;">${rec}. Evaluated against CATL Megapack warranty guidelines and 99.8% Availability SLA requirements.</p>
     </div>
-    <div style="display:flex; justify-content:space-between; background:var(--slate-950); padding:0.65rem; border-radius:6px; font-size:0.78rem;">
-      <span>Rack Temperature: <strong style="color:var(--amber-500);">42.1 °C</strong></span>
-      <span>Cell Delta V: <strong>84 mV</strong></span>
-      <span>SoH Health: <strong style="color:var(--emerald-400);">97.4%</strong></span>
-    </div>
   `;
   footer.innerHTML = `
     <button class="btn-smoke" onclick="closeModalDirect()">Cancel</button>
     <button class="btn-primary-action" onclick="executeInspectionAction('${id}')">Execute Approved Action</button>
   `;
-
   modal.classList.add('open');
 }
 
 function executeInspectionAction(id) {
   closeModalDirect();
-  appendConsoleLine(`[ACTION]: Executed approved action for ${id}. SCADA telemetry reconciled.`, 'action');
-  alert(`Action for ${id} executed successfully! SCADA status updated.`);
+  appendConsoleLine(`[ACTION]: Executed approved action for ${id}.`, 'action');
+  alert(`Action for ${id} executed successfully!`);
 }
 
-// Composio Integration Modals & Smoke Test
 function openComposioModal(appName) {
   const modal = document.getElementById('app-modal');
-  const title = document.getElementById('modal-title');
-  const body = document.getElementById('modal-body');
-  const footer = document.getElementById('modal-footer');
-
-  title.innerText = `Connect Integration: ${appName}`;
-  body.innerHTML = `
-    <p>Connecting <strong>${appName}</strong> via Composio Tool Execution Engine.</p>
-    <div class="form-row">
-      <label>API Key / OAuth Token</label>
-      <input type="password" value="cmp_live_9981293819028319" placeholder="Enter API Key">
-    </div>
-    <div class="form-row">
-      <label>Target Telemetry Webhook URL</label>
-      <input type="text" value="https://api.sloelabs.com/v1/composio/webhook" readonly>
-    </div>
+  document.getElementById('modal-title').innerText = `Connect Integration: ${appName}`;
+  document.getElementById('modal-body').innerHTML = `
+    <p>Connecting <strong>${appName}</strong> via Composio Tool Engine.</p>
+    <div class="form-row"><label>API Key / OAuth Token</label><input type="password" value="cmp_live_9981293819028319"></div>
   `;
-  footer.innerHTML = `
+  document.getElementById('modal-footer').innerHTML = `
     <button class="btn-smoke" onclick="closeModalDirect()">Cancel</button>
-    <button class="btn-primary-action" onclick="confirmComposioConnect('${appName}')">Approve & Save Integration</button>
+    <button class="btn-primary-action" onclick="closeModalDirect(); alert('${appName} Connected!');">Approve & Save Integration</button>
   `;
-
   modal.classList.add('open');
 }
 
-function confirmComposioConnect(appName) {
-  closeModalDirect();
-  appendConsoleLine(`[COMPOSIO]: Successfully connected ${appName} to SLOE Agent workspace.`, 'action');
-  alert(`${appName} successfully authenticated via Composio!`);
-  
-  const connectedKpi = document.getElementById('int-kpi-connected');
-  if (connectedKpi) connectedKpi.innerText = parseInt(connectedKpi.innerText) + 1;
-}
+function runSmokeTest(appName) { alert(`Smoke test for ${appName} PASSED!`); }
+function disconnectApp(appName) { if (confirm(`Disconnect ${appName}?`)) alert(`${appName} disconnected.`); }
+function closeModal(e) { if (e.target.classList.contains('modal-overlay')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('app-modal')?.classList.remove('open'); }
 
-function runSmokeTest(appName) {
-  appendConsoleLine(`[SMOKE TEST]: Running automated smoke test on ${appName}... Passed 200 OK.`, 'action');
-  alert(`Smoke test for ${appName} PASSED! Tools exposed and verified.`);
-}
-
-function disconnectApp(appName) {
-  if (confirm(`Are you sure you want to disconnect ${appName}?`)) {
-    appendConsoleLine(`[COMPOSIO]: Disconnected ${appName}.`, 'action');
-    alert(`${appName} disconnected.`);
-  }
-}
-
-function closeModal(e) {
-  if (e.target.classList.contains('modal-overlay')) closeModalDirect();
-}
-
-function closeModalDirect() {
-  document.getElementById('app-modal')?.classList.remove('open');
-}
-
-// Composio Filtering
 function filterComposioCategory(catKey) {
   currentCategory = catKey;
   document.querySelectorAll('.pill-chip').forEach(el => el.classList.remove('active'));
@@ -247,9 +340,7 @@ function filterComposioCategory(catKey) {
   renderComposioFeatured();
 }
 
-function filterComposioApps() {
-  renderComposioFeatured();
-}
+function filterComposioApps() { renderComposioFeatured(); }
 
 function renderComposioFeatured() {
   const container = document.getElementById('composio-featured-grid');
@@ -275,167 +366,54 @@ function renderComposioFeatured() {
   `).join('');
 }
 
-// Ops Chart Timeframe Controls
-function setOpsTimeframe(tf) {
-  document.querySelectorAll('.time-btn').forEach(el => el.classList.remove('active'));
-  event.target.classList.add('active');
-
-  appendConsoleLine(`[OPS CHART]: Timeframe adjusted to ${tf}. Re-rendering telemetry graph.`, 'line');
-  updateOpsChart();
-}
-
-function renderOpsChart() {
-  const ctx = document.getElementById('opsChartCanvas')?.getContext('2d');
-  if (!ctx) return;
-
-  opsChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: getOpsChartData(currentDomain),
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
-      },
-      plugins: {
-        legend: { labels: { color: '#f8fafc' } }
-      }
-    }
-  });
-}
-
-function updateOpsChart() {
-  if (opsChartInstance) {
-    opsChartInstance.data = getOpsChartData(currentDomain);
-    opsChartInstance.update();
-  }
-}
-
-function getOpsChartData(domain) {
-  const labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'];
-  if (domain === 'contracted') {
-    return {
-      labels,
-      datasets: [
-        { label: 'System SoH (%)', data: [98.5, 98.4, 98.1, 97.9, 97.6, 97.4, 97.4], borderColor: '#10b981', fill: true, backgroundColor: 'rgba(16,185,129,0.1)' },
-        { label: 'OEM Warranty Ceiling', data: [95, 95, 95, 95, 95, 95, 95], borderColor: '#ef4444', borderDash: [5, 5] }
-      ]
-    };
-  } else {
-    return {
-      labels,
-      datasets: [
-        { label: 'Real-Time LMP ($/MWh)', data: [22, 18, 45, 12, 180, 248, 65], borderColor: '#3b82f6', fill: true, backgroundColor: 'rgba(59,130,246,0.15)' }
-      ]
-    };
-  }
-}
-
-function renderHeatmap() {
-  const container = document.getElementById('container-heatmap');
-  if (!container) return;
-  container.innerHTML = '';
-
-  for (let i = 1; i <= 12; i++) {
-    const temp = (34 + Math.random() * 8).toFixed(1);
-    const soc = Math.floor(40 + Math.random() * 55);
-    const cell = document.createElement('div');
-    cell.style.cssText = 'background:#020617; border:1px solid #1e293b; padding:0.5rem; border-radius:6px; font-size:0.75rem; cursor:pointer;';
-    cell.onclick = () => alert(`BESS Rack #${i}: Temperature ${temp}°C, SoC ${soc}%. HVAC cooling active.`);
-    cell.innerHTML = `
-      <div style="color:#94a3b8; display:flex; justify-content:space-between;">
-        <span>BESS #${i}</span>
-        <span>${soc}%</span>
-      </div>
-      <div style="color:#10b981; font-weight:bold; font-size:0.95rem; margin-top:0.2rem;">${temp}°C</div>
-    `;
-    container.appendChild(cell);
-  }
-}
-
-// Setup Steps Interactive Toggle
 function toggleStep(stepNum) {
   const step = document.getElementById(`step-${stepNum}`);
   const check = document.getElementById(`check-${stepNum}`);
   if (!step || !check) return;
-
-  if (step.classList.contains('done')) {
-    step.classList.remove('done');
-    check.className = 'step-circle';
-    check.innerText = '○';
-  } else {
-    step.classList.add('done');
-    check.className = 'step-check';
-    check.innerText = '✓';
-  }
+  step.classList.toggle('done');
+  check.innerText = step.classList.contains('done') ? '✓' : '○';
 }
 
-// Agent Console REPL & Rule Toggles
 function toggleAgentRule(agentName, isEnabled) {
-  const status = isEnabled ? 'ENABLED' : 'DISABLED';
-  appendConsoleLine(`[RULE GOVERNANCE]: Autonomous rule for ${agentName} set to ${status}.`, 'action');
+  appendConsoleLine(`[RULE GOVERNANCE]: ${agentName} rule set to ${isEnabled ? 'ENABLED' : 'DISABLED'}.`, 'action');
 }
 
 function testAgentPrompt(agentName) {
-  appendConsoleLine(`[USER PROMPT ➔ ${agentName}]: Executing diagnostic check on BESS container telemetry...`, 'user');
-  setTimeout(() => {
-    if (agentName === 'Operator') {
-      appendConsoleLine(`🤖 [Operator]: Container #3 cell delta V reconciled. Temp stable at 38.2°C.`, 'line');
-    } else if (agentName === 'Analyst') {
-      appendConsoleLine(`🤖 [Analyst]: ERCOT 18:30 price spike model confirmed at $248.50/MWh. 25MW discharge bid queued.`, 'line');
-    } else {
-      appendConsoleLine(`🤖 [Guardrail]: CATL/Tesla Megapack warranty throughput verified. 312 EFC used out of 365 allowed.`, 'line');
-    }
-  }, 500);
+  appendConsoleLine(`[PROMPT ➔ ${agentName}]: Running diagnostic check...`, 'user');
+  setTimeout(() => appendConsoleLine(`🤖 [${agentName}]: Check complete. All systems operating within parameters.`, 'line'), 400);
 }
 
-function handleConsolePrompt(e) {
-  if (e.key === 'Enter') submitConsolePrompt();
-}
+function handleConsolePrompt(e) { if (e.key === 'Enter') submitConsolePrompt(); }
 
 function submitConsolePrompt() {
   const input = document.getElementById('console-input');
   const val = input?.value.trim();
   if (!val) return;
-
   appendConsoleLine(`[USER COMMAND]: ${val}`, 'user');
   input.value = '';
-
-  setTimeout(() => {
-    appendConsoleLine(`🤖 [SLOE AGENT CORE]: Parsed command "${val}". Telemetry data synced across Modbus & ERCOT gateways.`, 'line');
-  }, 600);
+  setTimeout(() => appendConsoleLine(`🤖 [AGENT CORE]: Executed "${val}". Reconciled SCADA streams.`, 'line'), 500);
 }
 
 function appendConsoleLine(text, type = 'line') {
-  const consoleBox = document.getElementById('agent-console-log');
-  if (!consoleBox) return;
-
+  const box = document.getElementById('agent-console-log');
+  if (!box) return;
   const div = document.createElement('div');
   div.className = `console-line ${type}`;
   div.innerText = text;
-  consoleBox.appendChild(div);
-  consoleBox.scrollTop = consoleBox.scrollHeight;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
 }
 
 function simulateEvent() {
-  appendConsoleLine(`🚨 [SCADA TELEMETRY ALERT]: Thermal drift detected in Inverter #4. Generated exception WO-9084.`, 'action');
-  alert('Simulated SCADA telemetry event: Thermal imbalance detected in BESS Rack #4.');
+  appendConsoleLine(`🚨 [SCADA ALERT]: Thermal drift in BESS Container #3. Created WO-9084.`, 'action');
+  alert('SCADA telemetry alert generated: Thermal imbalance in Container #3.');
 }
 
 function saveSettings() {
-  const crate = document.getElementById('cfg-crate')?.value;
-  const temp = document.getElementById('cfg-temp')?.value;
-  appendConsoleLine(`[SETTINGS SAVED]: Max C-Rate set to ${crate}, Thermal Ceiling set to ${temp}.`, 'action');
   alert('Settings saved successfully!');
+  appendConsoleLine('[SETTINGS]: Updated hardware operating boundaries.', 'action');
 }
 
 function handleGlobalSearch(e) {
-  if (e.key === 'Enter') {
-    alert(`Searching Sloe Energy OS records for: "${e.target.value}"`);
-  }
-}
-
-function toggleUserMenu() {
-  alert('Demo Test (sloelabs.com) - Enterprise Asset Principal');
+  if (e.key === 'Enter') alert(`Searching Sloe Energy OS for "${e.target.value}"...`);
 }

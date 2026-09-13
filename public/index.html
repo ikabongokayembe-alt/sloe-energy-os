@@ -15,16 +15,14 @@
     
     <!-- EXACT SLOE OS SIDEBAR -->
     <aside class="sidebar-nav">
-      <!-- Top Brand & User Header -->
       <div class="sidebar-top-user">
-        <div class="user-avatar-box" id="sidebar-user-avatar">DT</div>
+        <div class="user-avatar-box">DT</div>
         <div class="user-meta">
-          <h1 class="user-name" id="sidebar-user-name">Demo Test</h1>
-          <span class="user-firm" id="sidebar-firm-name">Utility Energy Asset Workspace</span>
+          <h1 class="user-name">Demo Test</h1>
+          <span class="user-firm">Utility Energy Asset Workspace</span>
         </div>
       </div>
 
-      <!-- Domain Mode Pill -->
       <div class="domain-pill-container">
         <div class="domain-pill-box" onclick="toggleDomainModal()" style="cursor:pointer;" title="Click to switch market domain">
           <span class="domain-label">Workspace:</span>
@@ -32,9 +30,7 @@
         </div>
       </div>
 
-      <!-- Sidebar Navigation Menu -->
       <nav class="sidebar-menu">
-        <!-- Today / Command Center -->
         <div class="nav-group">
           <button type="button" class="nav-item active" id="nav-today" onclick="navigateTo('today')">
             <span class="nav-icon">🏠</span>
@@ -42,7 +38,6 @@
           </button>
         </div>
 
-        <!-- AGENTS -->
         <div class="nav-group">
           <div class="section-title">AGENTS</div>
           <button type="button" class="nav-item" id="nav-agent-operator" onclick="navigateTo('ai-agents')">
@@ -55,19 +50,16 @@
           </button>
         </div>
 
-        <!-- OPERATIONS (Dynamic per Market Mode) -->
         <div class="nav-group">
           <div class="section-title">OPERATIONS</div>
           <div id="dynamic-ops-nav"></div>
         </div>
 
-        <!-- GROWTH & COMPLIANCE (Dynamic per Market Mode) -->
         <div class="nav-group">
           <div class="section-title">GROWTH & COMPLIANCE</div>
           <div id="dynamic-growth-nav"></div>
         </div>
 
-        <!-- SYSTEMS -->
         <div class="nav-group">
           <div class="section-title">SYSTEMS</div>
           <button type="button" class="nav-item" id="nav-integrations" onclick="navigateTo('integrations')">
@@ -81,9 +73,8 @@
         </div>
       </nav>
 
-      <!-- User Footer Dropdown -->
       <div class="sidebar-footer">
-        <div class="user-footer-btn" onclick="toggleUserMenu()">
+        <div class="user-footer-btn" onclick="alert('Demo Test - Asset Principal')">
           <div class="user-avatar-sm">DT</div>
           <div class="user-footer-text">
             <span class="user-footer-name">Demo Test</span>
@@ -101,30 +92,26 @@
       <header class="workspace-topbar">
         <div class="topbar-search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" id="global-search-input" placeholder="Search records, SCADA telemetry, work orders..." onkeyup="handleGlobalSearch(event)">
+          <input type="text" placeholder="Search records, SCADA telemetry, work orders..." onkeyup="handleGlobalSearch(event)">
         </div>
 
         <div class="topbar-actions">
-          <!-- Domain Switcher Button -->
           <button class="btn-domain-toggle" onclick="toggleDomainModal()">
             <span class="domain-toggle-icon">🔄</span>
             <span id="domain-toggle-label">Switch to Merchant Market</span>
           </button>
           <button class="btn-action-pill" onclick="navigateTo('integrations')">🔌 Composio Status</button>
-          <span class="data-status-badge" id="scada-status-pill">⚡ SCADA Telemetry Live</span>
+          <span class="data-status-badge">⚡ SCADA Telemetry Live</span>
         </div>
       </header>
 
       <!-- SCREEN 1: TODAY / COMMAND CENTER -->
       <div class="view-screen active" id="view-today">
-        
-        <!-- Dev Preview Banner -->
         <div class="dev-preview-banner">
           <span class="banner-warn-icon">⚠️</span>
-          <p id="dev-banner-text">Development preview. SCADA telemetry feeds, BESS container sensors, and wholesale ERCOT/CAISO market gateways active. Live execution enabled.</p>
+          <p>Development preview. SCADA telemetry feeds, BESS container sensors, and wholesale ERCOT/CAISO market gateways active.</p>
         </div>
 
-        <!-- Today Hero Section -->
         <div class="today-hero-card">
           <div class="hero-top">
             <div class="hero-title-group">
@@ -138,52 +125,37 @@
           </div>
         </div>
 
-        <!-- Setup & Tools Row -->
         <div class="two-col-grid">
-          
-          <!-- Workspace Setup Card -->
           <div class="slate-card">
             <h3>Workspace setup</h3>
             <p class="card-subtext">Complete these steps before relying on daily operational dispatches.</p>
-            
             <div class="setup-steps-list">
               <div class="setup-step done" id="step-1" onclick="toggleStep(1)">
                 <span class="step-check" id="check-1">✓</span>
-                <div>
-                  <strong>Account active</strong>
-                  <p>Your identity and asset workspace profile loaded.</p>
-                </div>
+                <div><strong>Account active</strong><p>Your identity and asset workspace profile loaded.</p></div>
               </div>
               <div class="setup-step done" id="step-2" onclick="toggleStep(2)">
                 <span class="step-check" id="check-2">✓</span>
-                <div>
-                  <strong>Add a trusted data source</strong>
-                  <p>Modbus SCADA & ERCOT Market Gateways connected.</p>
-                </div>
+                <div><strong>Add a trusted data source</strong><p>Modbus SCADA & ERCOT Market Gateways connected.</p></div>
               </div>
               <div class="setup-step" id="step-3" onclick="toggleStep(3)">
                 <span class="step-circle" id="check-3">○</span>
-                <div>
-                  <strong>Review the first evidence-backed result</strong>
-                  <p>Verified thermal stability & warranty cycle limits.</p>
-                </div>
+                <div><strong>Review the first evidence-backed result</strong><p>Verified thermal stability & warranty cycle limits.</p></div>
               </div>
             </div>
           </div>
 
-          <!-- Tools You Can Evaluate Now Card -->
           <div class="slate-card">
             <h3>Tools you can evaluate now</h3>
             <p class="card-subtext">These bounded workflows accept real-time SCADA telemetry and market price feeds.</p>
-            
             <div class="tools-grid-mini">
-              <div class="mini-tool-box" onclick="navigateTo('operations')">
+              <div class="mini-tool-box" onclick="navigateTo('tool-sla')">
                 <span class="mini-tool-icon">📊</span>
                 <h4 id="tool1-name">Availability SLA Tracker</h4>
                 <p id="tool1-desc">Monitor 99.8% plant uptime & contract SLAs.</p>
                 <span class="tool-open-link">Open →</span>
               </div>
-              <div class="mini-tool-box" onclick="navigateTo('operations')">
+              <div class="mini-tool-box" onclick="navigateTo('tool-degradation')">
                 <span class="mini-tool-icon">🛡️</span>
                 <h4 id="tool2-name">Thermal Fade Engine</h4>
                 <p id="tool2-desc">Audit CATL/Tesla battery degradation curves.</p>
@@ -191,10 +163,8 @@
               </div>
             </div>
           </div>
-
         </div>
 
-        <!-- Today's Review Queue Section -->
         <div class="slate-card">
           <div class="card-header-row">
             <div class="header-with-icon">
@@ -209,48 +179,276 @@
 
           <div class="queue-table-container">
             <table class="queue-table">
-              <thead>
-                <tr id="queue-table-head"></tr>
-              </thead>
+              <thead><tr id="queue-table-head"></tr></thead>
               <tbody id="queue-table-body"></tbody>
             </table>
           </div>
         </div>
-
       </div>
 
-      <!-- SCREEN 2: OPERATIONS WORKSPACE -->
-      <div class="view-screen" id="view-operations">
+      <!-- WORKSPACE TOOL 1: AVAILABILITY SLA TRACKER -->
+      <div class="view-screen" id="view-tool-sla">
         <div class="ops-page-header">
-          <div class="ops-header-top">
-            <h2 id="ops-page-title">Operations & Telemetry</h2>
-            <div class="chart-time-pills">
-              <button class="time-btn active" onclick="setOpsTimeframe('5m')">5m Live</button>
-              <button class="time-btn" onclick="setOpsTimeframe('24h')">24 Hours</button>
-              <button class="time-btn" onclick="setOpsTimeframe('7d')">7 Days</button>
-            </div>
+          <h2>📊 Availability SLA & Outage Penalty Tracker</h2>
+          <p>Real-time plant uptime monitoring against 98.0% PPA contractual availability targets.</p>
+        </div>
+
+        <div class="four-kpi-grid">
+          <div class="slate-kpi-card">
+            <span class="kpi-title">CURRENT AVAILABILITY</span>
+            <span class="kpi-number green-text">99.82%</span>
+            <span class="kpi-desc">Target: 98.00% Minimum</span>
           </div>
-          <p id="ops-page-sub">Real-time SCADA telemetry, battery state-of-health, and market bidding ladders.</p>
+          <div class="slate-kpi-card">
+            <span class="kpi-title">UNPLANNED DOWNTIME</span>
+            <span class="kpi-number">1.4 Hrs</span>
+            <span class="kpi-desc">Allowed: 17.5 Hrs / Quarter</span>
+          </div>
+          <div class="slate-kpi-card">
+            <span class="kpi-title">SLA PENALTY RISK</span>
+            <span class="kpi-number green-text">$0.00</span>
+            <span class="kpi-desc">Zero Outage Penalties Accrued</span>
+          </div>
+          <div class="slate-kpi-card">
+            <span class="kpi-title">OFFTAKER SLA STATUS</span>
+            <span class="kpi-number cyan-text">COMPLIANT</span>
+            <span class="kpi-desc">Utility PPA Verified</span>
+          </div>
+        </div>
+
+        <div class="slate-card">
+          <div class="card-header-row">
+            <h3>Outage Log & Downtime Reconciler</h3>
+            <button class="btn-primary-action" onclick="downloadSlaReport()">📥 Download SEC & Utility Compliance Memo (PDF)</button>
+          </div>
+          <table class="queue-table">
+            <thead>
+              <tr><th>Outage ID</th><th>Container Unit</th><th>Outage Cause</th><th>Duration</th><th>SLA Penalty Impact</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="color:#fff; font-weight:bold;">#OUT-102</td><td>BESS Container #3</td><td>HVAC Fan Speed Sensor Fault</td><td>42 Mins</td><td>$0.00 (Within Buffer)</td><td><span style="color:var(--emerald-400);">Resolved</span></td></tr>
+              <tr><td style="color:#fff; font-weight:bold;">#OUT-103</td><td>PV Inverter #8</td><td>Grid High Voltage Surge Trip</td><td>42 Mins</td><td>$0.00 (Utility Grid Force Majeure)</td><td><span style="color:var(--emerald-400);">Resolved</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TOOL 2: THERMAL & SOH DEGRADATION ENGINE -->
+      <div class="view-screen" id="view-tool-degradation">
+        <div class="ops-page-header">
+          <h2>📉 Thermal & State of Health (SoH) Degradation Engine</h2>
+          <p>Cell-level thermal monitoring and 15-year battery capacity fade forecasting.</p>
         </div>
 
         <div class="two-col-grid">
           <div class="slate-card flex-2">
             <div class="card-header-row">
-              <h3 id="chart-card-title">Fleet Battery Health & Degradation Fade Curve</h3>
-              <span class="status-pill green" id="chart-live-badge">SCADA Live (50ms)</span>
+              <h3>15-Year Capacity Fade & Degradation Simulator</h3>
+              <span class="status-pill green">Physics Model Live</span>
             </div>
             <div class="chart-wrapper">
-              <canvas id="opsChartCanvas"></canvas>
+              <canvas id="degradationChartCanvas"></canvas>
             </div>
           </div>
 
           <div class="slate-card flex-1">
-            <div class="card-header-row">
-              <h3>BESS Thermal Container Grid</h3>
-              <span class="status-pill blue">12 Racks</span>
+            <h3>Container Thermal Controls</h3>
+            <div class="form-row">
+              <label>Target Container HVAC Temp: <strong id="hvac-temp-val">22°C</strong></label>
+              <input type="range" min="15" max="30" value="22" oninput="updateHvacTemp(this.value)">
             </div>
-            <p class="card-subtext">Click any container to inspect live cell voltage and run thermal test.</p>
-            <div class="heatmap-grid" id="container-heatmap"></div>
+            <div class="form-row">
+              <label>Max Allowed Charge Rate (C-Rate): <strong id="c-rate-val">1.2 C</strong></label>
+              <input type="range" min="0.5" max="2.5" step="0.1" value="1.2" oninput="updateCRate(this.value)">
+            </div>
+            <button class="btn-primary-action" style="margin-top:0.5rem;" onclick="runThermalSimulation()">Run Thermal Simulation</button>
+          </div>
+        </div>
+
+        <div class="slate-card">
+          <h3>BESS Container Thermal Heatmap Grid</h3>
+          <div class="heatmap-grid" id="degradation-heatmap-grid"></div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TOOL 3: LMP SPOT ARBITRAGE RADAR -->
+      <div class="view-screen" id="view-tool-arbitrage">
+        <div class="ops-page-header">
+          <h2>⚡ LMP Spot Arbitrage & Bidding Ladder</h2>
+          <p>Real-time 5-minute ERCOT & CAISO wholesale electricity market price spikes and execution bids.</p>
+        </div>
+
+        <div class="slate-card">
+          <div class="card-header-row">
+            <h3>Real-Time 5-Min Locational Marginal Price (LMP)</h3>
+            <span class="status-pill blue">ERCOT South Node</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="arbitrageChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="slate-card">
+            <h3>Create 5-Min Wholesale Market Bid</h3>
+            <div class="form-row">
+              <label>Market Node</label>
+              <select id="bid-node" style="background:var(--slate-950); color:#fff; border:1px solid var(--slate-800); padding:0.5rem; border-radius:6px;">
+                <option>ERCOT South Zone ($248.50/MWh Target)</option>
+                <option>ERCOT North Zone ($18.20/MWh Target)</option>
+                <option>CAISO SP15 Node ($180.00/MWh Target)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Bid Type</label>
+              <select id="bid-type" style="background:var(--slate-950); color:#fff; border:1px solid var(--slate-800); padding:0.5rem; border-radius:6px;">
+                <option>Discharge (SELL to Grid)</option>
+                <option>Charge (BUY from Grid)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Volume (MW)</label>
+              <input type="number" id="bid-volume" value="25">
+            </div>
+            <button class="btn-primary-action" onclick="submitMarketBid()">Submit 5-Min Market Bid</button>
+          </div>
+
+          <div class="slate-card">
+            <h3>Active Bidding Stack Log</h3>
+            <table class="queue-table">
+              <thead><tr><th>Bid ID</th><th>Type</th><th>Volume</th><th>Target Price</th><th>Status</th></tr></thead>
+              <tbody id="bidding-stack-tbody">
+                <tr><td style="color:#fff; font-weight:bold;">#BID-4491</td><td>Discharge</td><td>25 MW</td><td style="color:var(--emerald-400);">$248.50 / MWh</td><td><span style="color:var(--emerald-400);">Executed</span></td></tr>
+                <tr><td style="color:#fff; font-weight:bold;">#BID-4492</td><td>Charge</td><td>40 MW</td><td style="color:var(--cyan-400);">$18.20 / MWh</td><td><span style="color:var(--amber-500);">Pending</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TOOL 4: CYCLING COST & REVENUE ENGINE -->
+      <div class="view-screen" id="view-tool-cycling">
+        <div class="ops-page-header">
+          <h2>💰 Marginal Cycling Cost & Trade Profitability Engine</h2>
+          <p>Calculates battery CapEx wear cost per MWh to block unprofitable market trades.</p>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="slate-card">
+            <h3>Trade Profitability Gatekeeper</h3>
+            <div style="background:var(--slate-950); padding:1rem; border-radius:8px; border:1px solid var(--slate-800);">
+              <span style="font-size:0.7rem; color:var(--slate-500); font-family:var(--font-mono);">LIVE SPREAD vs CYCLING COST</span>
+              <div style="font-size:1.8rem; font-weight:bold; color:var(--emerald-400); margin:0.3rem 0;">+$210.40 / MWh Net Profit</div>
+              <p style="font-size:0.8rem; color:var(--slate-400);">LMP Price ($248.50) minus Battery Cycling Degradation Cost ($38.10/MWh).</p>
+            </div>
+
+            <div class="form-row">
+              <label>Battery Pack CapEx Replacement Cost ($ / kWh)</label>
+              <input type="text" id="capex-cost" value="$130 / kWh" oninput="recalculateMarginalCost()">
+            </div>
+            <div class="form-row">
+              <label>Marginal Cycling Wear Cost</label>
+              <input type="text" id="marginal-wear-val" value="$38.10 / MWh" readonly>
+            </div>
+          </div>
+
+          <div class="slate-card">
+            <h3>Automated Gatekeeper Rule Status</h3>
+            <div class="setup-steps-list">
+              <div class="setup-step done">
+                <span class="step-check">✓</span>
+                <div><strong>Profitability Threshold (> $15/MWh Net)</strong><p>Current Trade Spread: +$210.40/MWh. Approved.</p></div>
+              </div>
+              <div class="setup-step done">
+                <span class="step-check">✓</span>
+                <div><strong>Thermal Floor Check (< 40°C Container Temp)</strong><p>Current Avg Temp: 36.2°C. Approved.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TOOL 5: OEM WARRANTY GUARDRAIL -->
+      <div class="view-screen" id="view-tool-warranty">
+        <div class="ops-page-header">
+          <h2>📜 OEM Warranty & Operating Boundary Auditor</h2>
+          <p>Audits throughput & thermal compliance against CATL & Tesla Megapack warranty contracts.</p>
+        </div>
+
+        <div class="four-kpi-grid">
+          <div class="slate-kpi-card">
+            <span class="kpi-title">ANNUAL FULL CYCLES (EFC)</span>
+            <span class="kpi-number">312 EFC</span>
+            <span class="kpi-desc">Limit: 365 EFC / Year</span>
+          </div>
+          <div class="slate-kpi-card">
+            <span class="kpi-title">WARRANTY COMPLIANCE</span>
+            <span class="kpi-number green-text">100%</span>
+            <span class="kpi-desc">Zero Contract Violations</span>
+          </div>
+          <div class="slate-kpi-card">
+            <span class="kpi-title">MAX TEMP VIOLATIONS</span>
+            <span class="kpi-number">0</span>
+            <span class="kpi-desc">Cutoff: 45.0°C Max</span>
+          </div>
+          <div class="slate-kpi-card">
+            <span class="kpi-title">OEM AUDIT STATUS</span>
+            <span class="kpi-number cyan-text">PASSED</span>
+            <span class="kpi-desc">CATL / Tesla Verified</span>
+          </div>
+        </div>
+
+        <div class="slate-card">
+          <div class="card-header-row">
+            <h3>OEM Warranty Log & Verification Package</h3>
+            <button class="btn-primary-action" onclick="downloadWarrantyPackage()">📥 Download Stamped OEM Warranty Audit Package (PDF)</button>
+          </div>
+          <p class="card-subtext">All operational data logs are cryptographically hashed and audit-ready for Tesla/CATL warranty claims.</p>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TOOL 6: O&M FIELD DISPATCH -->
+      <div class="view-screen" id="view-tool-dispatch">
+        <div class="ops-page-header">
+          <h2>🛠️ Autonomous O&M Field Dispatch Workstation</h2>
+          <p>Diagnostic ticket generation, spare parts inventory sync, and Salesforce Field Service dispatch.</p>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="slate-card">
+            <h3>Dispatch New Field Work Order</h3>
+            <div class="form-row">
+              <label>Container / Inverter Unit</label>
+              <select id="wo-unit" style="background:var(--slate-950); color:#fff; border:1px solid var(--slate-800); padding:0.5rem; border-radius:6px;">
+                <option>BESS Container #3 (Thermal Sensor)</option>
+                <option>PV Inverter #8 (Dust Filter)</option>
+                <option>Transformer Switchgear #1</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Priority Level</label>
+              <select id="wo-priority" style="background:var(--slate-950); color:#fff; border:1px solid var(--slate-800); padding:0.5rem; border-radius:6px;">
+                <option>P1 - Critical High Heat</option>
+                <option>P2 - Urgent Maintenance</option>
+                <option>P3 - Routine Inspection</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Technician Assignment</label>
+              <input type="text" id="wo-tech" value="Lead Tech Mark Vance (Salesforce Sync)">
+            </div>
+            <button class="btn-primary-action" onclick="dispatchWorkOrder()">Dispatch Work Order via Salesforce</button>
+          </div>
+
+          <div class="slate-card">
+            <h3>Active Field Dispatches</h3>
+            <table class="queue-table">
+              <thead><tr><th>Ticket ID</th><th>Unit</th><th>Diagnostic</th><th>Technician</th><th>Status</th></tr></thead>
+              <tbody id="dispatch-tbody">
+                <tr><td style="color:#fff; font-weight:bold;">#WO-9081</td><td>Container #3</td><td>Thermal Sensor Fault</td><td>Mark Vance</td><td><span style="color:var(--amber-500);">Dispatched</span></td></tr>
+                <tr><td style="color:#fff; font-weight:bold;">#WO-9082</td><td>Inverter #8</td><td>Dust Filter Cleaning</td><td>Sarah Connor</td><td><span style="color:var(--emerald-400);">Completed</span></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -324,7 +522,6 @@
           </div>
         </div>
 
-        <!-- Interactive Agent Console Stream -->
         <div class="slate-card">
           <div class="card-header-row">
             <h3>Agent Execution Console & Output Stream</h3>
@@ -338,12 +535,10 @@
             <button class="btn-primary-action" onclick="submitConsolePrompt()">Execute Command</button>
           </div>
         </div>
-
       </div>
 
       <!-- SCREEN 4: INTEGRATIONS (COMPOSIO) -->
       <div class="view-screen" id="view-integrations">
-        
         <div class="integrations-header-row">
           <div>
             <h2>🔌 Integrations</h2>
@@ -352,45 +547,20 @@
           <button class="btn-other-source" onclick="openComposioModal('Custom Connector')">+ Other source</button>
         </div>
 
-        <!-- 4 KPI Stat Cards -->
         <div class="four-kpi-grid">
-          <div class="slate-kpi-card">
-            <span class="kpi-title">CONNECTED</span>
-            <span class="kpi-number" id="int-kpi-connected">2</span>
-            <span class="kpi-desc">Apps that have actually completed auth.</span>
-          </div>
-
-          <div class="slate-kpi-card">
-            <span class="kpi-title">READY FOR AGENT USE</span>
-            <span class="kpi-number" id="int-kpi-ready">2</span>
-            <span class="kpi-desc">Connected, scoped, tools exposed, and smoke tested.</span>
-          </div>
-
-          <div class="slate-kpi-card">
-            <span class="kpi-title">NEEDS REPAIR</span>
-            <span class="kpi-number">0</span>
-            <span class="kpi-desc">Reconnect or approve access before an agent relies on it.</span>
-          </div>
-
-          <div class="slate-kpi-card">
-            <span class="kpi-title">LIVE IMPORTS</span>
-            <span class="kpi-number" id="int-kpi-imports">3</span>
-            <span class="kpi-desc">Sheets and files already mapped into workspace screens.</span>
-          </div>
+          <div class="slate-kpi-card"><span class="kpi-title">CONNECTED</span><span class="kpi-number" id="int-kpi-connected">2</span><span class="kpi-desc">Apps that have actually completed auth.</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">READY FOR AGENT USE</span><span class="kpi-number">2</span><span class="kpi-desc">Connected, scoped, tools exposed, and smoke tested.</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">NEEDS REPAIR</span><span class="kpi-number">0</span><span class="kpi-desc">Reconnect or approve access before an agent relies on it.</span></div>
+          <div class="slate-kpi-card"><span class="kpi-title">LIVE IMPORTS</span><span class="kpi-number">3</span><span class="kpi-desc">Sheets and files already mapped into workspace screens.</span></div>
         </div>
 
-        <!-- Connected Integrations -->
         <div class="integrations-group">
           <h3 class="group-title">CONNECTED INTEGRATIONS (2)</h3>
-          
           <div class="connected-grid">
             <div class="white-int-card">
               <div class="int-card-top">
                 <div class="int-app-icon scada">⚡</div>
-                <div>
-                  <h4>Modbus SCADA Gateway</h4>
-                  <span class="tag-ready">✓ READY INTEGRATION</span>
-                </div>
+                <div><h4>Modbus SCADA Gateway</h4><span class="tag-ready">✓ READY INTEGRATION</span></div>
               </div>
               <span class="tag-sub-ready">🟢 Ready</span>
               <p>Connected and ready for approved agent work.</p>
@@ -403,10 +573,7 @@
             <div class="white-int-card">
               <div class="int-card-top">
                 <div class="int-app-icon ercot">📈</div>
-                <div>
-                  <h4>ERCOT Market Gateway</h4>
-                  <span class="tag-ready">✓ READY INTEGRATION</span>
-                </div>
+                <div><h4>ERCOT Market Gateway</h4><span class="tag-ready">✓ READY INTEGRATION</span></div>
               </div>
               <span class="tag-sub-ready">🟢 Ready</span>
               <p>Connected and ready for approved market bid execution.</p>
@@ -418,10 +585,8 @@
           </div>
         </div>
 
-        <!-- Browse Apps Section (Composio Catalog) -->
         <div class="integrations-group">
           <h3 class="group-title">BROWSE APPS (COMPOSIO)</h3>
-          
           <div class="composio-search-bar">
             <span class="search-icon">🔍</span>
             <input type="text" id="composio-search-input" placeholder="Search apps..." onkeyup="filterComposioApps()">
@@ -436,13 +601,8 @@
           </div>
 
           <h4 class="featured-title">FEATURED APPS</h4>
-
-          <div class="featured-grid" id="composio-featured-grid">
-            <!-- Dynamically Rendered -->
-          </div>
-
+          <div class="featured-grid" id="composio-featured-grid"></div>
         </div>
-
       </div>
 
       <!-- SCREEN 5: SETTINGS -->
@@ -454,22 +614,10 @@
 
         <div class="slate-card width-50">
           <h3>Operating & Warranty Boundaries</h3>
-          <div class="form-row">
-            <label>Maximum Allowed C-Rate</label>
-            <input type="text" id="cfg-crate" value="1.5 C (Continuous)">
-          </div>
-          <div class="form-row">
-            <label>Thermal Ceiling Cutoff (°C)</label>
-            <input type="text" id="cfg-temp" value="45.0 °C">
-          </div>
-          <div class="form-row">
-            <label>Annual Max Full Cycles (EFC)</label>
-            <input type="text" id="cfg-cycles" value="365 Cycles / Year">
-          </div>
-          <div class="form-row">
-            <label>Production Custom Domain</label>
-            <input type="text" value="energy.sloelabs.com" readonly>
-          </div>
+          <div class="form-row"><label>Maximum Allowed C-Rate</label><input type="text" id="cfg-crate" value="1.5 C (Continuous)"></div>
+          <div class="form-row"><label>Thermal Ceiling Cutoff (°C)</label><input type="text" id="cfg-temp" value="45.0 °C"></div>
+          <div class="form-row"><label>Annual Max Full Cycles (EFC)</label><input type="text" id="cfg-cycles" value="365 Cycles / Year"></div>
+          <div class="form-row"><label>Production Custom Domain</label><input type="text" value="energy.sloelabs.com" readonly></div>
           <button class="btn-primary-action" style="margin-top:0.75rem;" onclick="saveSettings()">Save Settings</button>
         </div>
       </div>
@@ -477,16 +625,14 @@
     </main>
   </div>
 
-  <!-- INTERACTIVE MODAL (Inspection & Composio Auth) -->
+  <!-- INTERACTIVE MODAL -->
   <div class="modal-overlay" id="app-modal" onclick="closeModal(event)">
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3 id="modal-title">Inspection Evidence Modal</h3>
         <button class="modal-close" onclick="closeModalDirect()">✕</button>
       </div>
-      <div class="modal-body" id="modal-body">
-        <!-- Content inserted dynamically -->
-      </div>
+      <div class="modal-body" id="modal-body"></div>
       <div class="modal-footer" id="modal-footer">
         <button class="btn-primary-action" onclick="closeModalDirect()">Close</button>
       </div>

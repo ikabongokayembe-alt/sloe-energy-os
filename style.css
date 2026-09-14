@@ -1308,3 +1308,123 @@ input:checked + .slider:before { transform: translateX(16px); }
 .send-arrow {
   font-size: 1rem;
 }
+
+/* RICH VISUAL SCADA TWIN NODE CARDS & TELEMETRY DRAWER */
+.scada-node-card {
+  background: var(--slate-900);
+  border: 1px solid var(--slate-800);
+  border-radius: 12px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.scada-node-card:hover {
+  border-color: var(--cyan-400);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+  transform: translateY(-2px);
+}
+
+.scada-node-card.warning-node {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.05) 0%, var(--slate-900) 100%);
+}
+
+.node-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.node-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.node-icon { font-size: 1.1rem; }
+.node-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 800; color: #fff; }
+
+.node-status-badge {
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+}
+.node-status-badge.green { background: rgba(16, 185, 129, 0.15); color: var(--emerald-400); border: 1px solid rgba(16, 185, 129, 0.3); }
+.node-status-badge.amber { background: rgba(245, 158, 11, 0.15); color: var(--amber-400); border: 1px solid rgba(245, 158, 11, 0.3); animation: pulseAmber 2s infinite; }
+
+@keyframes pulseAmber {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.node-soc-bar-container { display: flex; flex-direction: column; gap: 0.35rem; }
+.soc-label-row { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--slate-400); }
+.soc-track { height: 7px; background: var(--slate-950); border-radius: 4px; overflow: hidden; border: 1px solid var(--slate-800); }
+.soc-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+.soc-fill.cyan-fill { background: linear-gradient(90deg, #0284c7, #06b6d4); }
+.soc-fill.amber-fill { background: linear-gradient(90deg, #d97706, #f59e0b); }
+
+.node-metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: var(--slate-950); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04); }
+.metric-cell { display: flex; flex-direction: column; gap: 0.1rem; }
+.m-label { font-size: 0.65rem; color: var(--slate-500); font-family: var(--font-mono); text-transform: uppercase; }
+.m-val { font-size: 0.85rem; font-weight: 700; color: #fff; }
+
+.node-footer-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.65rem; }
+.node-flow-text { color: var(--slate-400); font-family: var(--font-mono); font-size: 0.7rem; }
+.node-inspect-cta { color: var(--cyan-400); font-weight: 700; }
+
+/* DRAWER STYLES */
+.drawer-content-wrapper { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.drawer-ai-banner {
+  padding: 1rem 1.15rem;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.drawer-ai-banner.healthy { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); }
+.drawer-ai-banner.warning { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.35); }
+
+.ai-banner-title { display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem; font-family: var(--font-mono); font-weight: 800; color: var(--slate-300); }
+.ai-confidence { color: var(--emerald-400); }
+.ai-banner-text { font-size: 0.84rem; color: var(--slate-200); line-height: 1.5; }
+
+.drawer-kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+.d-kpi-card { background: var(--slate-950); border: 1px solid var(--slate-800); border-radius: 8px; padding: 0.75rem 0.9rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.d-kpi-title { font-size: 0.62rem; font-family: var(--font-mono); color: var(--slate-500); letter-spacing: 0.05em; }
+.d-kpi-val { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.d-kpi-sub { font-size: 0.68rem; color: var(--slate-400); }
+
+.drawer-section-card { background: var(--slate-900); border: 1px solid var(--slate-800); border-radius: 10px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.85rem; }
+.drawer-section-title { font-family: var(--font-heading); font-size: 0.88rem; font-weight: 700; color: var(--slate-100); }
+
+.rack-matrix { display: flex; flex-direction: column; gap: 0.65rem; }
+.rack-row { display: grid; grid-template-columns: 60px 1fr 140px; align-items: center; gap: 0.75rem; font-size: 0.78rem; }
+.rack-id { font-family: var(--font-mono); font-weight: 700; color: var(--slate-300); }
+.rack-bar-track { height: 6px; background: var(--slate-950); border-radius: 4px; overflow: hidden; border: 1px solid var(--slate-800); }
+.rack-bar-fill { height: 100%; border-radius: 4px; }
+.rack-bar-fill.green { background: var(--emerald-400); }
+.rack-bar-fill.amber { background: var(--amber-400); }
+.rack-meta { font-family: var(--font-mono); font-size: 0.74rem; color: var(--slate-400); text-align: right; }
+
+.control-field { display: flex; flex-direction: column; gap: 0.4rem; background: var(--slate-950); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--slate-800); }
+.control-label-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--slate-300); }
+
+.drawer-btn-group { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.5rem; }
+
+.audit-timeline { display: flex; flex-direction: column; gap: 0.75rem; }
+.timeline-item { display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.78rem; color: var(--slate-300); }
+.t-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 0.3rem; flex-shrink: 0; }
+.t-dot.green { background: var(--emerald-400); box-shadow: 0 0 8px var(--emerald-400); }
+.t-dot.amber { background: var(--amber-400); box-shadow: 0 0 8px var(--amber-400); }
+.t-dot.blue { background: var(--cyan-400); box-shadow: 0 0 8px var(--cyan-400); }

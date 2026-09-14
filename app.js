@@ -841,21 +841,46 @@ function renderScadaNodes() {
   container.innerHTML = '';
   SCADA_CONTAINER_NODES.forEach(node => {
     const card = document.createElement('div');
-    card.className = 'scada-node-card';
+    const isWarn = node.status === 'warning';
+    card.className = `scada-node-card ${isWarn ? 'warning-node' : ''}`;
     card.onclick = () => inspectContainerNode(node.id);
+
+    const socNum = parseInt(node.soc);
+    const flowText = isWarn ? '⚡ Thermal Throttled (5 MW)' : '⚡ Discharging (10 MW)';
 
     card.innerHTML = `
       <div class="node-top-row">
-        <span class="node-title">${node.id}</span>
-        <span class="node-status-dot ${node.status}"></span>
+        <div class="node-title-group">
+          <span class="node-icon">🔋</span>
+          <span class="node-title">${node.id}</span>
+        </div>
+        <span class="node-status-badge ${isWarn ? 'amber' : 'green'}">${isWarn ? '⚠️ TEMP DRIFT' : '🟢 HEALTHY'}</span>
       </div>
-      <div class="node-metrics-row">
-        <span>Temp: <strong class="node-temp-badge ${node.status === 'warning' ? 'high' : 'normal'}">${node.temp}</strong></span>
-        <span>SoC: <strong>${node.soc}</strong></span>
+
+      <div class="node-soc-bar-container">
+        <div class="soc-label-row">
+          <span>State of Charge (SoC)</span>
+          <strong style="color:#fff;">${node.soc}</strong>
+        </div>
+        <div class="soc-track">
+          <div class="soc-fill ${isWarn ? 'amber-fill' : 'cyan-fill'}" style="width: ${socNum}%;"></div>
+        </div>
       </div>
-      <div class="node-metrics-row">
-        <span>DC Bus: ${node.voltage}</span>
-        <span style="color:var(--cyan-400); font-weight:700;">Inspect →</span>
+
+      <div class="node-metrics-grid">
+        <div class="metric-cell">
+          <span class="m-label">Cell Temp</span>
+          <strong class="m-val ${isWarn ? 'amber-text' : 'green-text'}">${node.temp}</strong>
+        </div>
+        <div class="metric-cell">
+          <span class="m-label">DC Bus</span>
+          <strong class="m-val">${node.voltage}</strong>
+        </div>
+      </div>
+
+      <div class="node-footer-row">
+        <span class="node-flow-text">${flowText}</span>
+        <span class="node-inspect-cta">Inspect Drawer →</span>
       </div>
     `;
     container.appendChild(card);
@@ -864,26 +889,104 @@ function renderScadaNodes() {
 
 function inspectContainerNode(nodeId) {
   const node = SCADA_CONTAINER_NODES.find(n => n.id === nodeId) || SCADA_CONTAINER_NODES[0];
+  const isWarn = node.status === 'warning';
+
+  const aiNote = isWarn
+    ? `⚠️ <strong>Thermal Anomaly Alert:</strong> Cell Rack C is exhibiting thermal drift (+18.7°C above ambient). HVAC Chiller running at 100% capacity. <em>Recommended Action:</em> Lower HVAC target to 18°C or dispatch O&M field technician before the next 5-minute ERCOT discharge window.`
+    : `🟢 <strong>Nominal Telemetry:</strong> All 4 cell racks operating within optimal thermal envelope (21.5°C – 23.4°C). Cell voltage delta is 12 mV. HVAC Chiller operating at 45% load.`;
+
   const html = `
-    <div style="display:flex; flex-direction:column; gap:1rem;">
-      <div style="background:rgba(3,7,18,0.6); padding:1rem; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
-        <h4 style="font-family:var(--font-heading); color:#fff; font-size:1.1rem; margin-bottom:0.5rem;">${node.id} Telemetry Twin</h4>
-        <p>Status: <strong style="color:${node.status === 'warning' ? 'var(--amber-400)' : 'var(--emerald-400)'};">${node.status.toUpperCase()}</strong></p>
-        <p>Cell Temperature: <strong>${node.temp}</strong></p>
-        <p>State of Charge (SoC): <strong>${node.soc}</strong></p>
-        <p>DC Bus Voltage: <strong>${node.voltage}</strong></p>
-        <p>HVAC Chiller Status: <strong>ACTIVE (22°C Target)</strong></p>
+    <div class="drawer-content-wrapper">
+      <!-- AI OPERATOR DIAGNOSTIC BANNER -->
+      <div class="drawer-ai-banner ${isWarn ? 'warning' : 'healthy'}">
+        <div class="ai-banner-title">
+          <span>🤖 AGENT OPERATOR DIAGNOSTIC INSIGHT</span>
+          <span class="ai-confidence">99.4% Telemetry Confidence</span>
+        </div>
+        <p class="ai-banner-text">${aiNote}</p>
       </div>
 
-      <div class="form-row">
-        <label>Adjust Container HVAC Cooling Setpoint</label>
-        <input type="range" min="15" max="30" value="22" oninput="showToast('HVAC Target', 'Updated ' + '${node.id}' + ' HVAC to ' + this.value + '°C', 'action')">
+      <!-- KEY TELEMETRY KPIS -->
+      <div class="drawer-kpi-grid">
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">STATE OF CHARGE</span>
+          <span class="d-kpi-val cyan-text">${node.soc}</span>
+          <span class="d-kpi-sub">Available: 19.8 MWh</span>
+        </div>
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">CELL TEMP</span>
+          <span class="d-kpi-val ${isWarn ? 'amber-text' : 'green-text'}">${node.temp}</span>
+          <span class="d-kpi-sub">Threshold: 45.0°C Max</span>
+        </div>
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">DC BUS VOLTAGE</span>
+          <span class="d-kpi-val">${node.voltage}</span>
+          <span class="d-kpi-sub">Inverter Bus Sync</span>
+        </div>
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">HVAC CHILLER</span>
+          <span class="d-kpi-val ${isWarn ? 'amber-text' : 'cyan-text'}">${isWarn ? '100% LOAD' : '45% LOAD'}</span>
+          <span class="d-kpi-sub">22°C Target Setpoint</span>
+        </div>
       </div>
 
-      <button class="btn-hitl-primary" onclick="showToast('Cell Balance', 'Triggered passive cell balancing for ' + '${node.id}', 'success'); closeDrawerDirect();">⚡ Run Container Balancing Cycle</button>
+      <!-- CELL RACK TOPOLOGY BREAKDOWN -->
+      <div class="drawer-section-card">
+        <h4 class="drawer-section-title">🔋 Internal Cell-Rack Topology & Voltage Balance</h4>
+        <div class="rack-matrix">
+          <div class="rack-row">
+            <span class="rack-id">Rack A</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 95%;"></div></div>
+            <span class="rack-meta">3.24 V | 22.1°C</span>
+          </div>
+          <div class="rack-row">
+            <span class="rack-id">Rack B</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 94%;"></div></div>
+            <span class="rack-meta">3.25 V | 22.4°C</span>
+          </div>
+          <div class="rack-row">
+            <span class="rack-id">Rack C</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill ${isWarn ? 'amber' : 'green'}" style="width: ${isWarn ? '78%' : '96%'};"></div></div>
+            <span class="rack-meta" style="${isWarn ? 'color:var(--amber-400); font-weight:bold;' : ''}">${isWarn ? '3.19 V | 42.1°C ⚠️' : '3.24 V | 22.3°C'}</span>
+          </div>
+          <div class="rack-row">
+            <span class="rack-id">Rack D</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 95%;"></div></div>
+            <span class="rack-meta">3.24 V | 22.2°C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE CONTROLS SECTION -->
+      <div class="drawer-section-card">
+        <h4 class="drawer-section-title">⚙️ Interactive Container Thermal & BMS Controls</h4>
+        
+        <div class="control-field">
+          <div class="control-label-row">
+            <label>HVAC Chiller Cooling Target Setpoint</label>
+            <strong id="drawer-hvac-val" class="cyan-text">22°C</strong>
+          </div>
+          <input type="range" min="15" max="30" value="22" oninput="document.getElementById('drawer-hvac-val').innerText = this.value + '°C'; showToast('HVAC Setpoint', 'Updated ${node.id} chiller target to ' + this.value + '°C', 'action')">
+        </div>
+
+        <div class="drawer-btn-group">
+          <button class="btn-hitl-primary" onclick="showToast('Cell Balance', 'Triggered Modbus passive cell balancing for ${node.id}', 'success'); closeDrawerDirect();">⚡ Run Container Balancing Cycle</button>
+          <button class="btn-hitl-secondary" onclick="executeHitlAction('dispatch-om')">🛠️ Dispatch Field Technician Ticket</button>
+        </div>
+      </div>
+
+      <!-- HISTORICAL TELEMETRY LOGS -->
+      <div class="drawer-section-card">
+        <h4 class="drawer-section-title">⏱️ Container Telemetry Audit Timeline</h4>
+        <div class="audit-timeline">
+          <div class="timeline-item"><span class="t-dot green"></span><div><strong>08:24:12 AM</strong>: Modbus telemetry heartbeat received. Cell sync OK.</div></div>
+          <div class="timeline-item"><span class="t-dot ${isWarn ? 'amber' : 'blue'}"></span><div><strong>08:15:00 AM</strong>: ${isWarn ? 'Thermal drift detected in Rack C (+18.7°C rise).' : 'Discharge cycle started (10 MW to 345kV Grid Bus).'}</div></div>
+          <div class="timeline-item"><span class="t-dot blue"></span><div><strong>07:30:00 AM</strong>: Automated daily BMS impedance diagnostic passed.</div></div>
+        </div>
+      </div>
     </div>
   `;
-  openDrawer(`${node.id} SCADA Detail`, html);
+  openDrawer(`${node.id} SCADA Telemetry Twin`, html);
 }
 
 function fileIsoDispute() {

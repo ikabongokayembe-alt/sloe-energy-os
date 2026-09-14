@@ -834,12 +834,28 @@ const SCADA_CONTAINER_NODES = [
   { id: 'BESS-12', temp: '21.8°C', soc: '85.0%', status: 'healthy', voltage: '1,426 V' }
 ];
 
+let currentScadaFilter = 'all';
+
+function filterScadaNodes(type) {
+  currentScadaFilter = type;
+  document.querySelectorAll('.scada-filter-chips .chip-item').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById(`scada-chip-${type}`);
+  if (activeBtn) activeBtn.classList.add('active');
+  renderScadaNodes();
+}
+
 function renderScadaNodes() {
   const container = document.getElementById('scada-nodes-container');
   if (!container) return;
 
+  const nodesToRender = SCADA_CONTAINER_NODES.filter(n => {
+    if (currentScadaFilter === 'warning') return n.status === 'warning';
+    if (currentScadaFilter === 'healthy') return n.status === 'healthy';
+    return true;
+  });
+
   container.innerHTML = '';
-  SCADA_CONTAINER_NODES.forEach(node => {
+  nodesToRender.forEach(node => {
     const card = document.createElement('div');
     const isWarn = node.status === 'warning';
     card.className = `scada-node-card ${isWarn ? 'warning-node' : ''}`;
@@ -885,6 +901,41 @@ function renderScadaNodes() {
     `;
     container.appendChild(card);
   });
+}
+
+function inspectSubstation() {
+  const html = `
+    <div class="drawer-content-wrapper">
+      <div class="drawer-ai-banner healthy">
+        <div class="ai-banner-title">
+          <span>🤖 AGENT OPERATOR SUBSTATION MONITOR</span>
+          <span class="ai-confidence">100% Modbus / DNP3 Sync</span>
+        </div>
+        <p class="ai-banner-text">🟢 <strong>345kV Interconnection Substation Nominal:</strong> Transformer T1 gas-in-oil (DGA) levels normal. SEL-411L line protection relay active. Zero breaker trip warnings.</p>
+      </div>
+
+      <div class="drawer-kpi-grid">
+        <div class="d-kpi-card"><span class="d-kpi-title">BUS VOLTAGE</span><span class="d-kpi-val cyan-text">345.2 kV</span><span class="d-kpi-sub">Target: 345.0 kV</span></div>
+        <div class="d-kpi-card"><span class="d-kpi-title">GRID FREQUENCY</span><span class="d-kpi-val green-text">59.98 Hz</span><span class="d-kpi-sub">ERCOT Nominal 60Hz</span></div>
+        <div class="d-kpi-card"><span class="d-kpi-title">TRANSFORMER TEMP</span><span class="d-kpi-val">48.2°C</span><span class="d-kpi-sub">Limit: 85.0°C Max</span></div>
+        <div class="d-kpi-card"><span class="d-kpi-title">BREAKER STATUS</span><span class="d-kpi-val green-text">CLOSED</span><span class="d-kpi-sub">Main Feeder 52A</span></div>
+      </div>
+
+      <div class="drawer-section-card">
+        <h4 class="drawer-section-title">📊 Dissolved Gas Analysis (DGA Transformer Health)</h4>
+        <div class="rack-matrix">
+          <div class="rack-row"><span class="rack-id">Hydrogen</span><div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 12%;"></div></div><span class="rack-meta">14 ppm (Normal)</span></div>
+          <div class="rack-row"><span class="rack-id">Methane</span><div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 8%;"></div></div><span class="rack-meta">6 ppm (Normal)</span></div>
+          <div class="rack-row"><span class="rack-id">Ethylene</span><div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 5%;"></div></div><span class="rack-meta">3 ppm (Normal)</span></div>
+        </div>
+      </div>
+
+      <div class="drawer-btn-group">
+        <button class="btn-hitl-primary" onclick="showToast('Substation Telemetry', 'Polled DNP3 protection relay status.', 'success'); closeDrawerDirect();">↻ Poll Substation Relays</button>
+      </div>
+    </div>
+  `;
+  openDrawer('Main 345kV Substation Telemetry Twin', html);
 }
 
 function inspectContainerNode(nodeId) {

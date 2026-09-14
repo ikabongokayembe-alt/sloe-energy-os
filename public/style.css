@@ -1428,3 +1428,80 @@ input:checked + .slider:before { transform: translateX(16px); }
 .t-dot.green { background: var(--emerald-400); box-shadow: 0 0 8px var(--emerald-400); }
 .t-dot.amber { background: var(--amber-400); box-shadow: 0 0 8px var(--amber-400); }
 .t-dot.blue { background: var(--cyan-400); box-shadow: 0 0 8px var(--cyan-400); }
+
+/* 2D ELECTRICAL SINGLE-LINE SCHEMATIC & FILTER CHIPS */
+.substation-title-row { display: flex; align-items: center; gap: 0.85rem; }
+
+.single-line-schematic {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--slate-950);
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--slate-800);
+  margin-top: 0.75rem;
+  overflow-x: auto;
+}
+
+.bus-node {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--slate-200);
+  background: var(--slate-900);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--slate-750);
+  white-space: nowrap;
+}
+.b-icon { font-size: 0.85rem; }
+
+.bus-wire-animated {
+  width: 45px;
+  height: 2px;
+  background: var(--cyan-400);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.wire-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 15px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
+  animation: pulseWire 1.5s infinite linear;
+}
+
+@keyframes pulseWire {
+  0% { left: -15px; }
+  100% { left: 45px; }
+}
+
+.scada-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chip-item {
+  background: var(--slate-950);
+  border: 1px solid var(--slate-800);
+  color: var(--slate-400);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-item:hover { border-color: var(--slate-600); color: #fff; }
+.chip-item.active { background: var(--slate-800); border-color: var(--cyan-400); color: var(--cyan-400); font-weight: 700; }
+.chip-item.warning.active { border-color: var(--amber-400); color: var(--amber-400); }
+.chip-item.green.active { border-color: var(--emerald-400); color: var(--emerald-400); }

@@ -784,16 +784,37 @@
         </div>
 
         <div class="scada-twin-layout">
+          <!-- 2D ELECTRICAL SINGLE-LINE SCHEMATIC & SUBSTATION BANNER -->
           <div class="scada-substation-bar">
             <div class="substation-left">
-              <h4>⚡ Interconnection Substation & Grid Bus (345kV ERCOT Interconnect)</h4>
-              <p>Total Plant Output: <strong>120 MW / 240 MWh</strong> | Substation Frequency: <strong>59.98 Hz</strong> | Transformer Temp: <strong>48.2°C</strong></p>
+              <div class="substation-title-row">
+                <h4>⚡ Interconnection Substation & 345kV Grid Bus (ERCOT South Interconnect)</h4>
+                <span class="status-pill green">SYNCHRONIZED TO GRID</span>
+              </div>
+              <p>Total Output: <strong>120 MW / 240 MWh</strong> | Grid Freq: <strong>59.98 Hz</strong> | Bus Volt: <strong>345.2 kV</strong> | Transformer Temp: <strong>48.2°C</strong></p>
+              
+              <!-- VISUAL SVG POWER ROUTING DIAGRAM -->
+              <div class="single-line-schematic">
+                <div class="bus-node"><span class="b-icon">🔌</span><span>345kV Grid Interconnect</span></div>
+                <div class="bus-wire-animated"><div class="wire-pulse"></div></div>
+                <div class="bus-node"><span class="b-icon">⚡</span><span>150MVA Main Transformer T1</span></div>
+                <div class="bus-wire-animated"><div class="wire-pulse"></div></div>
+                <div class="bus-node"><span class="b-icon">🔋</span><span>34.5kV BESS Collector Feeder A & B</span></div>
+              </div>
             </div>
-            <button class="btn-hitl-primary" onclick="openDrawer('Substation Telemetry', '<h4>Main Interconnection Substation</h4><p>Voltage: 345.2 kV<br>Frequency: 59.98 Hz<br>Main Breaker Status: CLOSED<br>Protection Relay: NORMAL</p>')">Inspect Substation</button>
+            <button class="btn-hitl-primary" onclick="inspectSubstation()">Inspect Substation Drawer</button>
           </div>
 
           <div class="slate-card">
-            <h3>BESS Container Nodes (Click node to inspect live telemetry drawer)</h3>
+            <div class="card-header-row">
+              <h3>BESS Container Nodes (Click node to inspect live telemetry drawer)</h3>
+              <div class="scada-filter-chips">
+                <button class="chip-item active" id="scada-chip-all" onclick="filterScadaNodes('all')">All Containers (12)</button>
+                <button class="chip-item warning" id="scada-chip-warn" onclick="filterScadaNodes('warning')">⚠️ Thermal Drift (1)</button>
+                <button class="chip-item green" id="scada-chip-healthy" onclick="filterScadaNodes('healthy')">🟢 Healthy (11)</button>
+              </div>
+            </div>
+            
             <div class="scada-containers-grid" id="scada-nodes-container">
               <!-- Dynamically populated via app.js -->
             </div>

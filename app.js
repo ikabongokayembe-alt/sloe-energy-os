@@ -366,10 +366,10 @@ function inspectThermalContainer(nodeId) {
         
         <div class="control-field">
           <div class="control-label-row">
-            <label>Target HVAC Chiller Cooling Setpoint</label>
+            <label>🔋 ${node.id} Local Container HVAC Chiller Override</label>
             <strong id="thermal-hvac-val" class="cyan-text">22°C</strong>
           </div>
-          <input type="range" min="15" max="30" value="22" oninput="document.getElementById('thermal-hvac-val').innerText = this.value + '°C'; showToast('HVAC Setpoint', 'Updated ' + '${node.id}' + ' chiller target to ' + this.value + '°C', 'action')">
+          <input type="range" min="15" max="30" value="22" oninput="document.getElementById('thermal-hvac-val').innerText = this.value + '°C'; showToast('HVAC Override', 'Updated ' + '${node.id}' + ' local chiller override to ' + this.value + '°C', 'action')">
         </div>
 
         <div class="drawer-btn-group">

@@ -277,10 +277,10 @@
           </div>
 
           <div class="slate-card flex-1">
-            <h3>Container Thermal Controls</h3>
-            <div class="form-row"><label>Target Container HVAC Temp: <strong id="hvac-temp-val">22°C</strong></label><input type="range" min="15" max="30" value="22" oninput="updateHvacTemp(this.value)"></div>
-            <div class="form-row"><label>Max Allowed Charge Rate (C-Rate): <strong id="c-rate-val">1.2 C</strong></label><input type="range" min="0.5" max="2.5" step="0.1" value="1.2" oninput="updateCRate(this.value)"></div>
-            <button class="btn-primary-action" style="margin-top:0.5rem;" onclick="runThermalSimulation()">Run Thermal Simulation</button>
+            <h3>🌐 Global Plant-Wide Thermal Guardrails</h3>
+            <div class="form-row"><label>Global Plant HVAC Baseline: <strong id="hvac-temp-val">22°C (Site-Wide)</strong></label><input type="range" min="15" max="30" value="22" oninput="updateHvacTemp(this.value)"></div>
+            <div class="form-row"><label>Global Max Discharge (C-Rate): <strong id="c-rate-val">1.2 C (Plant Cap)</strong></label><input type="range" min="0.5" max="2.5" step="0.1" value="1.2" oninput="updateCRate(this.value)"></div>
+            <button class="btn-primary-action" style="margin-top:0.5rem;" onclick="runThermalSimulation()">Run Plant 15-Yr Simulation</button>
           </div>
         </div>
 

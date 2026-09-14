@@ -229,23 +229,173 @@ function runThermalSimulation() {
   appendConsoleLine(`[THERMAL SIMULATOR]: Re-calculated cell degradation curve with ${temp} HVAC cooling.`, 'action');
 }
 
+const THERMAL_CONTAINER_DATA = [
+  { id: 'BESS #1', temp: 34.0, soc: 60, status: 'healthy', fanSpeed: '45%', voltage: '1,420 V' },
+  { id: 'BESS #2', temp: 36.8, soc: 73, status: 'healthy', fanSpeed: '55%', voltage: '1,418 V' },
+  { id: 'BESS #3', temp: 38.7, soc: 75, status: 'warning', fanSpeed: '85%', voltage: '1,392 V' },
+  { id: 'BESS #4', temp: 37.6, soc: 74, status: 'healthy', fanSpeed: '60%', voltage: '1,421 V' },
+  { id: 'BESS #5', temp: 36.1, soc: 88, status: 'healthy', fanSpeed: '52%', voltage: '1,425 V' },
+  { id: 'BESS #6', temp: 34.2, soc: 75, status: 'healthy', fanSpeed: '48%', voltage: '1,419 V' },
+  { id: 'BESS #7', temp: 39.5, soc: 46, status: 'warning', fanSpeed: '95%', voltage: '1,388 V' },
+  { id: 'BESS #8', temp: 34.9, soc: 55, status: 'healthy', fanSpeed: '50%', voltage: '1,420 V' },
+  { id: 'BESS #9', temp: 37.1, soc: 70, status: 'healthy', fanSpeed: '58%', voltage: '1,418 V' },
+  { id: 'BESS #10', temp: 37.0, soc: 75, status: 'healthy', fanSpeed: '58%', voltage: '1,423 V' },
+  { id: 'BESS #11', temp: 35.7, soc: 48, status: 'healthy', fanSpeed: '48%', voltage: '1,421 V' },
+  { id: 'BESS #12', temp: 39.4, soc: 57, status: 'warning', fanSpeed: '92%', voltage: '1,390 V' }
+];
+
 function renderThermalHeatmap() {
   const container = document.getElementById('degradation-heatmap-grid');
   if (!container) return;
   container.innerHTML = '';
 
-  for (let i = 1; i <= 12; i++) {
-    const temp = (34 + Math.random() * 6).toFixed(1);
-    const soc = Math.floor(45 + Math.random() * 50);
-    const cell = document.createElement('div');
-    cell.style.cssText = 'background:#020617; border:1px solid #1e293b; padding:0.6rem; border-radius:6px; font-size:0.75rem; cursor:pointer;';
-    cell.onclick = () => alert(`BESS Rack #${i}: Temp ${temp}°C, SoC ${soc}%. Cell voltage delta 14mV.`);
-    cell.innerHTML = `
-      <div style="color:#94a3b8; display:flex; justify-content:space-between;"><span>BESS #${i}</span><span>${soc}%</span></div>
-      <div style="color:#10b981; font-weight:bold; font-size:0.95rem; margin-top:0.2rem;">${temp}°C</div>
+  THERMAL_CONTAINER_DATA.forEach(node => {
+    const isWarn = node.temp >= 38.5;
+    const card = document.createElement('div');
+    card.className = `scada-node-card ${isWarn ? 'warning-node' : ''}`;
+    card.onclick = () => inspectThermalContainer(node.id);
+
+    const tempColorClass = node.temp >= 39.0 ? 'amber-text' : (node.temp >= 37.0 ? 'cyan-text' : 'green-text');
+
+    card.innerHTML = `
+      <div class="node-top-row">
+        <div class="node-title-group">
+          <span class="node-icon">📉</span>
+          <span class="node-title">${node.id}</span>
+        </div>
+        <span class="node-status-badge ${isWarn ? 'amber' : 'green'}">${isWarn ? '⚠️ WARM' : '🟢 NORMAL'}</span>
+      </div>
+
+      <div class="node-soc-bar-container">
+        <div class="soc-label-row">
+          <span>State of Charge (SoC)</span>
+          <strong style="color:#fff;">${node.soc}%</strong>
+        </div>
+        <div class="soc-track">
+          <div class="soc-fill ${isWarn ? 'amber-fill' : 'cyan-fill'}" style="width: ${node.soc}%;"></div>
+        </div>
+      </div>
+
+      <div class="node-metrics-grid">
+        <div class="metric-cell">
+          <span class="m-label">Cell Temp</span>
+          <strong class="m-val ${tempColorClass}">${node.temp.toFixed(1)}°C</strong>
+        </div>
+        <div class="metric-cell">
+          <span class="m-label">Chiller Load</span>
+          <strong class="m-val">${node.fanSpeed}</strong>
+        </div>
+      </div>
+
+      <div class="node-footer-row">
+        <span class="node-flow-text">SoH: 96.4% | DC ${node.voltage}</span>
+        <span class="node-inspect-cta">Inspect Thermal Twin →</span>
+      </div>
     `;
-    container.appendChild(cell);
-  }
+    container.appendChild(card);
+  });
+}
+
+function inspectThermalContainer(nodeId) {
+  const node = THERMAL_CONTAINER_DATA.find(n => n.id === nodeId) || THERMAL_CONTAINER_DATA[0];
+  const isWarn = node.temp >= 38.5;
+
+  const aiNote = isWarn
+    ? `⚠️ <strong>Thermal Acceleration Advisory:</strong> ${node.id} surface temp is elevated (${node.temp}°C). Running HVAC Chiller at ${node.fanSpeed} load. Operating at current C-rate accelerates capacity degradation by +1.18x over 15-year baseline. <em>Recommendation:</em> Flush coolant circuit and lower target setpoint to 18°C.`
+    : `🟢 <strong>Capacity Preservation Optimal:</strong> ${node.id} is operating within nominal thermal parameters (${node.temp}°C). Projected 15-year capacity fade stays 12.4% above OEM warranty threshold.`;
+
+  const html = `
+    <div class="drawer-content-wrapper">
+      <!-- AI OPERATOR DIAGNOSTIC BANNER -->
+      <div class="drawer-ai-banner ${isWarn ? 'warning' : 'healthy'}">
+        <div class="ai-banner-title">
+          <span>🤖 AGENT OPERATOR THERMAL & SOH DIAGNOSIS</span>
+          <span class="ai-confidence">Physics Fade Model Live</span>
+        </div>
+        <p class="ai-banner-text">${aiNote}</p>
+      </div>
+
+      <!-- KEY KPIS -->
+      <div class="drawer-kpi-grid">
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">SURFACE TEMP</span>
+          <span class="d-kpi-val ${isWarn ? 'amber-text' : 'green-text'}">${node.temp}°C</span>
+          <span class="d-kpi-sub">Cutoff: 45.0°C Max</span>
+        </div>
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">STATE OF HEALTH (SoH)</span>
+          <span class="d-kpi-val green-text">96.4%</span>
+          <span class="d-kpi-sub">Baseline: 100.0%</span>
+        </div>
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">CHILLER LOAD</span>
+          <span class="d-kpi-val ${isWarn ? 'amber-text' : 'cyan-text'}">${node.fanSpeed}</span>
+          <span class="d-kpi-sub">HVAC Active Loop</span>
+        </div>
+        <div class="d-kpi-card">
+          <span class="d-kpi-title">DEGRADATION RATE</span>
+          <span class="d-kpi-val ${isWarn ? 'amber-text' : 'cyan-text'}">${isWarn ? '1.18x Accel' : '1.00x Nominal'}</span>
+          <span class="d-kpi-sub">CATL Warranty Standard</span>
+        </div>
+      </div>
+
+      <!-- CELL RACK THERMAL GRADIENT MATRIX -->
+      <div class="drawer-section-card">
+        <h4 class="drawer-section-title">🌡️ Cell Rack Thermal Gradient & Voltage Variance</h4>
+        <div class="rack-matrix">
+          <div class="rack-row">
+            <span class="rack-id">Rack A</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 90%;"></div></div>
+            <span class="rack-meta">3.24 V | ${(node.temp - 2.1).toFixed(1)}°C</span>
+          </div>
+          <div class="rack-row">
+            <span class="rack-id">Rack B</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 92%;"></div></div>
+            <span class="rack-meta">3.25 V | ${(node.temp - 1.2).toFixed(1)}°C</span>
+          </div>
+          <div class="rack-row">
+            <span class="rack-id">Rack C</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill ${isWarn ? 'amber' : 'green'}" style="width: ${isWarn ? '78%' : '95%'};"></div></div>
+            <span class="rack-meta" style="${isWarn ? 'color:var(--amber-400); font-weight:bold;' : ''}">${isWarn ? '3.19 V | ' + node.temp + '°C ⚠️' : '3.24 V | ' + node.temp + '°C'}</span>
+          </div>
+          <div class="rack-row">
+            <span class="rack-id">Rack D</span>
+            <div class="rack-bar-track"><div class="rack-bar-fill green" style="width: 91%;"></div></div>
+            <span class="rack-meta">3.24 V | ${(node.temp - 1.8).toFixed(1)}°C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS SECTION -->
+      <div class="drawer-section-card">
+        <h4 class="drawer-section-title">⚙️ Targeted Chiller & Thermal Mitigation Controls</h4>
+        
+        <div class="control-field">
+          <div class="control-label-row">
+            <label>Target HVAC Chiller Cooling Setpoint</label>
+            <strong id="thermal-hvac-val" class="cyan-text">22°C</strong>
+          </div>
+          <input type="range" min="15" max="30" value="22" oninput="document.getElementById('thermal-hvac-val').innerText = this.value + '°C'; showToast('HVAC Setpoint', 'Updated ' + '${node.id}' + ' chiller target to ' + this.value + '°C', 'action')">
+        </div>
+
+        <div class="drawer-btn-group">
+          <button class="btn-hitl-primary" onclick="showToast('Coolant Flush', 'Initiated targeted liquid coolant loop flush for ${node.id}', 'success'); closeDrawerDirect();">⚡ Run Targeted Coolant Flush</button>
+          <button class="btn-hitl-secondary" onclick="showToast('OEM Warranty Stamped', 'Exported cryptographic BMS log for ${node.id} to CATL warranty portal.', 'action');">📜 Stamped OEM Warranty Audit</button>
+        </div>
+      </div>
+
+      <!-- HISTORICAL TELEMETRY LOGS -->
+      <div class="drawer-section-card">
+        <h4 class="drawer-section-title">⏱️ Container Thermal Event History</h4>
+        <div class="audit-timeline">
+          <div class="timeline-item"><span class="t-dot green"></span><div><strong>09:12:00 AM</strong>: Chiller loop pressure check passed.</div></div>
+          <div class="timeline-item"><span class="t-dot ${isWarn ? 'amber' : 'blue'}"></span><div><strong>08:45:00 AM</strong>: ${isWarn ? 'HVAC Chiller ramped to ' + node.fanSpeed + ' to counteract ambient rise.' : 'BMS impedance auto-calibration complete.'}</div></div>
+          <div class="timeline-item"><span class="t-dot blue"></span><div><strong>07:00:00 AM</strong>: Daily 15-year capacity degradation baseline re-calculated.</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+  openDrawer(`${node.id} Thermal & SoH Twin`, html);
 }
 
 // ⚡ TOOL 3: LMP SPOT ARBITRAGE RADAR

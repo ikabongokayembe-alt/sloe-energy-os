@@ -118,6 +118,11 @@ function toggleDomainModal() {
 function renderDynamicNav() {
   const config = NAV_CONFIG[currentDomain];
 
+  const isoTimer = document.getElementById('iso-market-timer');
+  if (isoTimer) {
+    isoTimer.style.display = currentDomain === 'merchant' ? 'flex' : 'none';
+  }
+
   const domainBadge = document.getElementById('domain-badge-text');
   if (domainBadge) {
     domainBadge.innerText = config.domainBadge;

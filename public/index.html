@@ -97,7 +97,7 @@
         </div>
 
         <div class="topbar-actions">
-          <div class="iso-timer-pill" id="iso-market-timer" title="5-Minute ISO Spot Bid Gate Countdown">
+          <div class="iso-timer-pill" id="iso-market-timer" style="display:none;" title="5-Minute ISO Spot Bid Gate Countdown">
             <span class="timer-icon">⏱️</span>
             <span class="timer-label">ISO Gate:</span>
             <span class="timer-countdown" id="timer-clock-text">03:42</span>
@@ -107,9 +107,8 @@
             <span class="domain-toggle-icon">🔄</span>
             <span id="domain-toggle-label">Switch to Merchant Market</span>
           </button>
-          <button class="btn-action-pill" onclick="navigateTo('integrations')">🔌 Composio Status</button>
           <button class="btn-hitl-shift-end" onclick="executeEndShiftHandover()">🌙 End Shift & Lock Bot</button>
-          <span class="data-status-badge">⚡ SCADA Telemetry Live</span>
+          <span class="data-status-badge">⚡ SCADA Live</span>
         </div>
       </header>
 

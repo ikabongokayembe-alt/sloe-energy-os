@@ -99,6 +99,9 @@ function navigateTo(viewId) {
   if (viewId === 'tool-arbitrage' && arbitrageChartInstance) {
     setTimeout(() => arbitrageChartInstance.resize(), 100);
   }
+  if (viewId === 'ai-agents') {
+    renderConversationsList();
+  }
 }
 
 // Domain Switcher (Toggle Market Modes)
@@ -469,3 +472,297 @@ function openHedgeModal() {
 function handleGlobalSearch(e) {
   if (e.key === 'Enter') alert(`Searching Sloe Energy OS for "${e.target.value}"...`);
 }
+
+// CHAT WORKSPACE CONVERSATION DATA & CONTROLLERS
+let currentAgentIdentity = 'Operator'; // 'Operator' or 'Analyst'
+let activeConvId = 'sun-brief';
+let currentConvFilter = 'unread';
+
+const CONVERSATION_THREADS = [
+  {
+    id: 'sun-brief',
+    title: 'Sun Brief — Sep 13',
+    time: '19h',
+    unreadCount: 1,
+    tag: 'BRIEF',
+    read: false,
+    snippet: 'Here is your briefing. Before the d...',
+    agent: 'Operator',
+    paragraphs: [
+      "Before the day gets loud, here's where Sloe Energy OS stands. You built it with a clear mission — Run BESS & PV Utility Assets better — and that's the lens I'm using to read today.",
+      "Since we last caught up, one thread has stayed active: 'Sun Brief — Sep 13'. It's a focused start — exactly the kind of work Sloe Energy OS exists to do.",
+      "I've also got 18 suggestions waiting on your call (Thermal runaway check on Container #3, ERCOT 5-min LMP peak $248.50/MWh). They'll hold until you have a moment, but they're worth a look before they pile up — small calls get heavier the longer they sit.",
+      "So if you want a single focus: the thread at the top of your list right now is 'Sun Brief — Sep 13'. Start the day there, before the rest of it fills up — the desk always runs lighter when the freshest open loop gets attention first.",
+      "I'll be here, watching the threads and tracking what moves. Come find me when you need me."
+    ],
+    signature: "— Your Operator",
+    chatLog: []
+  },
+  {
+    id: 'sat-brief',
+    title: 'Sat Brief — Sep 12',
+    time: '1d',
+    unreadCount: 1,
+    tag: 'BRIEF',
+    read: false,
+    snippet: 'Here is your briefing. Before the d...',
+    agent: 'Operator',
+    paragraphs: [
+      "Weekend operational snapshot for Sloe Energy OS. SCADA telemetry passed 99.94% stability across all 12 Megapack containers.",
+      "Grid frequency response in CAISO Zone 4 triggered 3 micro-discharges, yielding +$14,200 in ancillary services revenue.",
+      "All thermal cell deltas remained below 12mV. Enjoy your weekend — the automated safety guardrails are fully active."
+    ],
+    signature: "— Your Operator",
+    chatLog: []
+  },
+  {
+    id: 'fri-brief',
+    title: 'Fri Brief — Sep 11',
+    time: '2d',
+    unreadCount: 1,
+    tag: 'BRIEF',
+    read: false,
+    snippet: 'End-of-week briefing — here\'s wh...',
+    agent: 'Operator',
+    paragraphs: [
+      "End-of-week briefing — here's what moved across your BESS and PV assets.",
+      "We executed 42 arbitrage cycles during ERCOT peak hours, avoiding $38/MWh in high degradation thermal zones.",
+      "Composio integration with Salesforce Field Service automatically closed 2 routine inverter maintenance work orders."
+    ],
+    signature: "— Your Operator",
+    chatLog: []
+  },
+  {
+    id: 'thu-brief',
+    title: 'Thu Brief — Sep 10',
+    time: '3d',
+    unreadCount: 1,
+    tag: 'BRIEF',
+    read: false,
+    snippet: 'Here is your briefing. Before the d...',
+    agent: 'Operator',
+    paragraphs: [
+      "Midweek performance report: Total revenue generated reached $184,500 across merchant and tolling assets.",
+      "State of Health (SoH) fade modeling confirms 98.4% capacity retention, outperforming OEM warranty targets by 1.2%."
+    ],
+    signature: "— Your Operator",
+    chatLog: []
+  },
+  {
+    id: 'wed-brief',
+    title: 'Wed Brief — Sep 9',
+    time: '4d',
+    unreadCount: 1,
+    tag: 'BRIEF',
+    read: true,
+    snippet: 'Midweek briefing — here\'s what h...',
+    agent: 'Operator',
+    paragraphs: [
+      "System initialization complete for Sloe Energy OS workspace.",
+      "Telemetry streams established with Modbus SCADA Gateway and ERCOT Real-Time Market API."
+    ],
+    signature: "— Your Operator",
+    chatLog: []
+  }
+];
+
+function renderConversationsList() {
+  const container = document.getElementById('conversations-list-container');
+  if (!container) return;
+
+  const filtered = CONVERSATION_THREADS.filter(item => {
+    if (currentConvFilter === 'unread') return !item.read;
+    return item.read;
+  });
+
+  container.innerHTML = '';
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="color:var(--slate-400); font-size:0.8rem; text-align:center; padding:2rem 0;">No conversations in this filter.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const isActive = item.id === activeConvId;
+    const div = document.createElement('div');
+    div.className = `conv-item ${isActive ? 'active' : ''}`;
+    div.onclick = () => selectConversation(item.id);
+
+    div.innerHTML = `
+      <div class="conv-avatar-box">
+        <div class="conv-avatar">${item.agent === 'Operator' ? 'O' : 'A'}</div>
+        <div class="conv-badge-dot"></div>
+      </div>
+      <div class="conv-content">
+        <div class="conv-top-line">
+          <span class="conv-title">${item.title}</span>
+          <span class="conv-time">${item.time}</span>
+        </div>
+        <span class="conv-snippet">${item.snippet}</span>
+        <div class="conv-tag-row">
+          <span class="tag-brief">${item.tag}</span>
+          ${item.unreadCount > 0 ? `<span class="conv-unread-badge">${item.unreadCount}</span>` : ''}
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Update unread count badge
+  const unreadCountEl = document.getElementById('unread-counter-num');
+  if (unreadCountEl) {
+    const totalUnread = CONVERSATION_THREADS.filter(t => !t.read).length;
+    unreadCountEl.innerText = totalUnread > 0 ? totalUnread * 20 + 9 : '0'; // stylized count like 109 in screenshot
+  }
+
+  renderActiveConversationCard();
+}
+
+function selectConversation(id) {
+  activeConvId = id;
+  const target = CONVERSATION_THREADS.find(t => t.id === id);
+  if (target) {
+    target.read = true;
+  }
+  renderConversationsList();
+}
+
+function renderActiveConversationCard() {
+  const bodyEl = document.getElementById('chat-briefing-body');
+  if (!bodyEl) return;
+
+  const activeThread = CONVERSATION_THREADS.find(t => t.id === activeConvId) || CONVERSATION_THREADS[0];
+
+  let html = '';
+  activeThread.paragraphs.forEach(p => {
+    html += `<p>${p}</p>`;
+  });
+
+  if (activeThread.signature) {
+    html += `<p class="sig-line">${activeThread.signature}</p>`;
+  }
+
+  if (activeThread.chatLog && activeThread.chatLog.length > 0) {
+    html += '<hr style="border:none; border-top:1px solid #CBD5E1; margin:1.5rem 0;">';
+    activeThread.chatLog.forEach(msg => {
+      if (msg.role === 'user') {
+        html += `<div class="chat-message-user"><strong>You:</strong> ${msg.text}</div>`;
+      } else {
+        html += `<div style="background:#FFFFFF; color:#0F172A; border-radius:12px; padding:1rem; margin-top:0.75rem; border:1px solid #E2E8F0;"><strong>🤖 ${activeThread.signature.replace('— Your ', '')}:</strong> ${msg.text}</div>`;
+      }
+    });
+  }
+
+  bodyEl.innerHTML = html;
+}
+
+function setConvFilter(filter) {
+  currentConvFilter = filter;
+  document.getElementById('pill-unread')?.classList.toggle('active', filter === 'unread');
+  document.getElementById('pill-read')?.classList.toggle('active', filter === 'read');
+  renderConversationsList();
+}
+
+function switchAgentSubTab(tab) {
+  document.querySelectorAll('.agent-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.chat-sub-view').forEach(v => v.classList.remove('active'));
+
+  const tabBtn = document.getElementById(`agent-tab-${tab}`);
+  const viewEl = document.getElementById(`subview-${tab}`);
+
+  if (tabBtn) tabBtn.classList.add('active');
+  if (viewEl) viewEl.classList.add('active');
+}
+
+function switchAgentIdentityModal() {
+  currentAgentIdentity = currentAgentIdentity === 'Operator' ? 'Analyst' : 'Operator';
+
+  const avatarCircle = document.getElementById('agent-avatar-circle');
+  const nameEl = document.getElementById('agent-display-name');
+  const roleEl = document.getElementById('agent-role-label');
+  const topPillName = document.getElementById('top-pill-agent-name');
+  const breadcrumb = document.getElementById('chat-agent-breadcrumb');
+  const chatInput = document.getElementById('chat-input-field');
+
+  if (currentAgentIdentity === 'Operator') {
+    if (avatarCircle) { avatarCircle.innerText = 'T'; avatarCircle.style.background = 'linear-gradient(135deg, #F43F5E, #E11D48)'; }
+    if (nameEl) nameEl.innerText = 'The Operator';
+    if (roleEl) roleEl.innerText = 'Operations Specialist';
+    if (topPillName) topPillName.innerText = 'Operator';
+    if (breadcrumb) breadcrumb.innerText = 'The Operator';
+    if (chatInput) chatInput.placeholder = 'Talk to the Operator...';
+  } else {
+    if (avatarCircle) { avatarCircle.innerText = 'A'; avatarCircle.style.background = 'linear-gradient(135deg, #0EA5E9, #2563EB)'; }
+    if (nameEl) nameEl.innerText = 'The Analyst';
+    if (roleEl) roleEl.innerText = 'Quant & Arbitrage Specialist';
+    if (topPillName) topPillName.innerText = 'Analyst';
+    if (breadcrumb) breadcrumb.innerText = 'The Analyst';
+    if (chatInput) chatInput.placeholder = 'Talk to the Analyst...';
+  }
+
+  appendConsoleLine(`[AGENT WORKSPACE]: Switched active chat view to ${currentAgentIdentity}.`, 'action');
+}
+
+function handleChatInputKey(e) {
+  if (e.key === 'Enter') sendChatMessage();
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input-field');
+  const text = input?.value.trim();
+  if (!text) return;
+
+  const activeThread = CONVERSATION_THREADS.find(t => t.id === activeConvId) || CONVERSATION_THREADS[0];
+  activeThread.chatLog.push({ role: 'user', text: text });
+  input.value = '';
+
+  renderActiveConversationCard();
+
+  setTimeout(() => {
+    const aiReply = currentAgentIdentity === 'Operator'
+      ? `Understood. I have logged your request: "${text}". Adjusting Container thermal limits & monitoring cell voltages.`
+      : `Quant model analyzed: "${text}". Running 5-min LMP arbitrage simulation for ERCOT nodes.`;
+
+    activeThread.chatLog.push({ role: 'agent', text: aiReply });
+    renderActiveConversationCard();
+    appendConsoleLine(`🤖 [${currentAgentIdentity}]: Replied to thread "${activeThread.title}".`, 'line');
+  }, 600);
+}
+
+function triggerAiSummary() {
+  alert('🪄 AI Briefing Summary generated from latest SCADA feeds and wholesale market signals.');
+}
+
+function startNewConversation() {
+  const title = prompt('Enter Conversation Title:', 'Grid Strategy Briefing');
+  if (!title) return;
+
+  const newObj = {
+    id: `conv-${Date.now()}`,
+    title: title,
+    time: 'Just now',
+    unreadCount: 0,
+    tag: 'NEW',
+    read: true,
+    snippet: 'New conversation started...',
+    agent: currentAgentIdentity,
+    paragraphs: [
+      `New thread initialized with ${currentAgentIdentity}. State of BESS assets and market gateways ready for your commands.`
+    ],
+    signature: `— Your ${currentAgentIdentity}`,
+    chatLog: []
+  };
+
+  CONVERSATION_THREADS.unshift(newObj);
+  activeConvId = newObj.id;
+  renderConversationsList();
+}
+
+function triggerAttachment() {
+  alert('📎 Attach telemetry log file or SCADA CSV export.');
+}
+
+// Re-render on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  renderConversationsList();
+});

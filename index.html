@@ -525,68 +525,139 @@
         </div>
       </div>
 
-      <!-- SCREEN 3: AI AGENTS -->
+      <!-- SCREEN 3: AI AGENTS WORKSPACE (CHAT & CONTROL ROOM) -->
       <div class="view-screen" id="view-ai-agents">
-        <div class="ops-page-header">
-          <h2>🤖 AI Agents Workspace</h2>
-          <p>Autonomous Agent Control Room & Execution Rule Playground</p>
+        <!-- TOP BREADCRUMB & SWITCHER HEADER -->
+        <div class="chat-view-topbar">
+          <div class="chat-breadcrumb">
+            <span class="breadcrumb-app">Sloe Energy OS.</span>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current" id="chat-agent-breadcrumb">The Operator</span>
+          </div>
+          <button class="btn-agent-top-pill" onclick="switchAgentIdentityModal()">
+            <span>⚙️</span>
+            <span id="top-pill-agent-name">Operator</span>
+          </button>
         </div>
 
-        <div class="agents-three-grid">
-          <div class="slate-card">
-            <div class="agent-head">
-              <span class="agent-avatar">🛡️</span>
-              <div><h4>The Operator</h4><span class="agent-role">Operations & Thermal Specialist</span></div>
-              <span class="online-tag">ONLINE</span>
+        <!-- AGENT PROFILE HEADER BANNER -->
+        <div class="agent-profile-banner">
+          <div class="agent-profile-left">
+            <div class="agent-big-avatar" id="agent-avatar-circle">T</div>
+            <div class="agent-identity-info">
+              <div class="agent-name-row" onclick="switchAgentIdentityModal()">
+                <h2 id="agent-display-name">The Operator</h2>
+                <span class="chevron-down">▾</span>
+              </div>
+              <div class="agent-role-pill">
+                <span class="role-icon">⚙️</span>
+                <span id="agent-role-label">Operations Specialist</span>
+                <span class="online-dot">• Online</span>
+              </div>
             </div>
-            <p class="agent-desc">Monitors container thermal runaway markers, cell voltage delta, and HVAC cooling loops.</p>
-            <div class="agent-toggle-row">
-              <span class="agent-rule-text">Rule: Cell Temp > 40°C ➔ Curtail</span>
-              <label class="toggle-switch"><input type="checkbox" checked onchange="toggleAgentRule('Operator', this.checked)"><span class="slider"></span></label>
-            </div>
-            <button class="btn-agent-test" onclick="testAgentPrompt('Operator')">Execute Diagnostics Test</button>
           </div>
 
-          <div class="slate-card">
-            <div class="agent-head">
-              <span class="agent-avatar">📊</span>
-              <div><h4>The Analyst</h4><span class="agent-role">Quant & Arbitrage Specialist</span></div>
-              <span class="online-tag">ONLINE</span>
-            </div>
-            <p class="agent-desc">Runs 5-minute locational marginal pricing (LMP) forecasts across ERCOT & CAISO nodes.</p>
-            <div class="agent-toggle-row">
-              <span class="agent-rule-text">Rule: LMP > $150/MWh ➔ Discharge</span>
-              <label class="toggle-switch"><input type="checkbox" checked onchange="toggleAgentRule('Analyst', this.checked)"><span class="slider"></span></label>
-            </div>
-            <button class="btn-agent-test" onclick="testAgentPrompt('Analyst')">Run ERCOT Market Forecast</button>
-          </div>
-
-          <div class="slate-card">
-            <div class="agent-head">
-              <span class="agent-avatar">📜</span>
-              <div><h4>SLA Guardrail</h4><span class="agent-role">Legal & Compliance Enforcement</span></div>
-              <span class="online-tag">ONLINE</span>
-            </div>
-            <p class="agent-desc">Audits annual full cycle counts against Tesla/CATL OEM warranty boundaries.</p>
-            <div class="agent-toggle-row">
-              <span class="agent-rule-text">Rule: Cycles > 365 ➔ Cap Depth</span>
-              <label class="toggle-switch"><input type="checkbox" checked onchange="toggleAgentRule('Guardrail', this.checked)"><span class="slider"></span></label>
-            </div>
-            <button class="btn-agent-test" onclick="testAgentPrompt('Guardrail')">Audit Megapack Warranty</button>
+          <div class="agent-nav-tabs">
+            <button class="agent-tab active" id="agent-tab-chat" onclick="switchAgentSubTab('chat')">
+              <span class="tab-icon">💬</span> Chat
+            </button>
+            <button class="agent-tab" id="agent-tab-assignments" onclick="switchAgentSubTab('assignments')">
+              <span class="tab-icon">📅</span> Assignments
+            </button>
+            <button class="agent-tab" id="agent-tab-workspace" onclick="switchAgentSubTab('workspace')">
+              <span class="tab-icon">🗄️</span> Workspace
+            </button>
+            <button class="agent-tab" id="agent-tab-activity" onclick="switchAgentSubTab('activity')">
+              <span class="tab-icon">📋</span> Activity
+            </button>
           </div>
         </div>
 
-        <div class="slate-card">
-          <div class="card-header-row">
-            <h3>Agent Execution Console & Output Stream</h3>
-            <span class="status-pill blue">Interactive REPL</span>
+        <!-- TAB CONTENT 1: CHAT WORKSPACE (SPLIT 2-PANEL VIEW MATCHING SCREENSHOT) -->
+        <div class="chat-sub-view active" id="subview-chat">
+          <div class="chat-workspace-split">
+            <!-- LEFT PANEL: CONVERSATIONS -->
+            <div class="conversations-panel">
+              <div class="conv-header">
+                <h3>Conversations</h3>
+                <div class="conv-header-actions">
+                  <button class="btn-sparkle" title="AI Briefing Summary" onclick="triggerAiSummary()">🪄</button>
+                  <button class="btn-add-conv" title="New Conversation" onclick="startNewConversation()">+</button>
+                </div>
+              </div>
+
+              <div class="conv-search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search conversations" onkeyup="filterConversations(this.value)">
+              </div>
+
+              <div class="conv-filter-pills">
+                <button class="filter-pill active" id="pill-unread" onclick="setConvFilter('unread')">UNREAD <span class="unread-count" id="unread-counter-num">109</span></button>
+                <button class="filter-pill" id="pill-read" onclick="setConvFilter('read')">READ</button>
+              </div>
+
+              <div class="conversations-list" id="conversations-list-container">
+                <!-- Populated dynamically via app.js -->
+              </div>
+            </div>
+
+            <!-- RIGHT PANEL: CHAT READER & INPUT -->
+            <div class="chat-reader-panel">
+              <div class="chat-card-container">
+                <div class="chat-briefing-card" id="chat-briefing-body">
+                  <!-- Active Conversation Content -->
+                </div>
+              </div>
+
+              <div class="chat-input-bar">
+                <div class="chat-input-pill">
+                  <input type="text" id="chat-input-field" placeholder="Talk to the Operator..." onkeypress="handleChatInputKey(event)">
+                  <button class="btn-attach" title="Attach file" onclick="triggerAttachment()">📎</button>
+                  <button class="btn-send-chat" title="Send message" onclick="sendChatMessage()">
+                    <span class="send-arrow">➔</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="agent-console-box" id="agent-console-log">
-            <div class="console-line">[SYSTEM]: SLOE Agent Engine initialized. 3 Agents active on live grid stream.</div>
+        </div>
+
+        <!-- TAB CONTENT 2: ASSIGNMENTS -->
+        <div class="chat-sub-view" id="subview-assignments">
+          <div class="slate-card">
+            <h3>📅 Agent Operational Assignments</h3>
+            <p class="card-subtext">Active tasks assigned to The Operator & The Analyst.</p>
+            <table class="queue-table" style="margin-top:1rem;">
+              <thead><tr><th>Assignment ID</th><th>Task Description</th><th>Asset Target</th><th>Status</th><th>Deadline</th></tr></thead>
+              <tbody>
+                <tr><td style="color:#fff; font-weight:bold;">#ASN-01</td><td>Monitor thermal balance & HVAC chiller rate</td><td>BESS Container #3</td><td><span class="status-pill green">In Progress</span></td><td>Continuous</td></tr>
+                <tr><td style="color:#fff; font-weight:bold;">#ASN-02</td><td>5-Minute ERCOT LMP Spot Bid Optimization</td><td>ERCOT South Zone</td><td><span class="status-pill cyan">Active Engine</span></td><td>Real-time</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="console-input-row">
-            <input type="text" id="console-input" placeholder="Type prompt to command agents (e.g. 'Audit Container #3 thermal fade')..." onkeypress="handleConsolePrompt(event)">
-            <button class="btn-primary-action" onclick="submitConsolePrompt()">Execute Command</button>
+        </div>
+
+        <!-- TAB CONTENT 3: WORKSPACE -->
+        <div class="chat-sub-view" id="subview-workspace">
+          <div class="slate-card">
+            <h3>🗄️ Agent Shared Workspace & Telemetry Data</h3>
+            <div class="agent-console-box" id="agent-console-log" style="height:240px; margin-top:1rem;">
+              <div class="console-line">[SYSTEM]: Sloe Energy OS Agent Engine initialized. 3 Agents active on live grid stream.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 4: ACTIVITY -->
+        <div class="chat-sub-view" id="subview-activity">
+          <div class="slate-card">
+            <h3>📋 Agent Audit & Execution Activity</h3>
+            <table class="queue-table" style="margin-top:1rem;">
+              <thead><tr><th>Timestamp</th><th>Agent</th><th>Action Executed</th><th>Outcome</th></tr></thead>
+              <tbody>
+                <tr><td style="color:#fff; font-weight:bold;">16:04:12</td><td>The Operator</td><td>Curtail Container #3 Charge Rate to 0.5C</td><td><span style="color:var(--emerald-400);">Success</span></td></tr>
+                <tr><td style="color:#fff; font-weight:bold;">15:58:30</td><td>The Analyst</td><td>Placed Day-Ahead Bid @ $248.50/MWh</td><td><span style="color:var(--emerald-400);">Matched</span></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

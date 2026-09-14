@@ -250,46 +250,40 @@ function renderThermalHeatmap() {
   container.innerHTML = '';
 
   THERMAL_CONTAINER_DATA.forEach(node => {
-    const isWarn = node.temp >= 38.5;
+    const heatLevel = node.temp >= 39.0 ? 'hot' : (node.temp >= 36.5 ? 'warm' : 'cool');
     const card = document.createElement('div');
-    card.className = `scada-node-card ${isWarn ? 'warning-node' : ''}`;
+    card.className = `thermal-infrared-card ${heatLevel}`;
     card.onclick = () => inspectThermalContainer(node.id);
 
-    const tempColorClass = node.temp >= 39.0 ? 'amber-text' : (node.temp >= 37.0 ? 'cyan-text' : 'green-text');
+    const statusBadge = heatLevel === 'hot' ? '🔥 HOT (+1.18x FADE)' : (heatLevel === 'warm' ? '🟡 ELEVATED' : '🟢 NOMINAL COOL');
+    const flowRate = heatLevel === 'hot' ? '18.4 L/min (Full Chiller Ramp)' : '12.0 L/min (Standard Loop)';
 
     card.innerHTML = `
-      <div class="node-top-row">
-        <div class="node-title-group">
-          <span class="node-icon">📉</span>
-          <span class="node-title">${node.id}</span>
+      <div class="thermal-top-row">
+        <div class="thermal-title-group">
+          <span class="thermal-icon">🌡️</span>
+          <span class="thermal-title">${node.id}</span>
         </div>
-        <span class="node-status-badge ${isWarn ? 'amber' : 'green'}">${isWarn ? '⚠️ WARM' : '🟢 NORMAL'}</span>
+        <span class="thermal-heat-badge ${heatLevel}">${statusBadge}</span>
       </div>
 
-      <div class="node-soc-bar-container">
-        <div class="soc-label-row">
-          <span>State of Charge (SoC)</span>
-          <strong style="color:#fff;">${node.soc}%</strong>
-        </div>
-        <div class="soc-track">
-          <div class="soc-fill ${isWarn ? 'amber-fill' : 'cyan-fill'}" style="width: ${node.soc}%;"></div>
-        </div>
-      </div>
-
-      <div class="node-metrics-grid">
-        <div class="metric-cell">
-          <span class="m-label">Cell Temp</span>
-          <strong class="m-val ${tempColorClass}">${node.temp.toFixed(1)}°C</strong>
-        </div>
-        <div class="metric-cell">
-          <span class="m-label">Chiller Load</span>
-          <strong class="m-val">${node.fanSpeed}</strong>
+      <div class="thermal-temp-display">
+        <span class="temp-big-val ${heatLevel}">${node.temp.toFixed(1)}°C</span>
+        <div class="temp-sub-meta">
+          <span>HVAC Load: <strong>${node.fanSpeed}</strong></span>
+          <span>Coolant: <strong>${flowRate}</strong></span>
         </div>
       </div>
 
-      <div class="node-footer-row">
-        <span class="node-flow-text">SoH: 96.4% | DC ${node.voltage}</span>
-        <span class="node-inspect-cta">Inspect Thermal Twin →</span>
+      <div class="thermal-gradient-meter">
+        <div class="thermal-meter-track">
+          <div class="thermal-meter-fill ${heatLevel}" style="width: ${Math.min(100, Math.max(10, ((node.temp - 25) / 20) * 100))}%;"></div>
+        </div>
+      </div>
+
+      <div class="thermal-footer-row">
+        <span class="thermal-soh-text">15-Yr Health: <strong>96.4% SoH</strong></span>
+        <span class="thermal-inspect-cta">Inspect Thermal Twin →</span>
       </div>
     `;
     container.appendChild(card);

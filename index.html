@@ -97,11 +97,18 @@
         </div>
 
         <div class="topbar-actions">
+          <div class="iso-timer-pill" id="iso-market-timer" title="5-Minute ISO Spot Bid Gate Countdown">
+            <span class="timer-icon">⏱️</span>
+            <span class="timer-label">ISO Gate:</span>
+            <span class="timer-countdown" id="timer-clock-text">03:42</span>
+          </div>
+
           <button class="btn-domain-toggle" onclick="toggleDomainModal()">
             <span class="domain-toggle-icon">🔄</span>
             <span id="domain-toggle-label">Switch to Merchant Market</span>
           </button>
           <button class="btn-action-pill" onclick="navigateTo('integrations')">🔌 Composio Status</button>
+          <button class="btn-hitl-shift-end" onclick="executeEndShiftHandover()">🌙 End Shift & Lock Bot</button>
           <span class="data-status-badge">⚡ SCADA Telemetry Live</span>
         </div>
       </header>
@@ -122,8 +129,20 @@
               </div>
               <p id="today-hero-desc">Live availability tracking & telemetry-backed exception queue for PPA & Tolling contracts.</p>
             </div>
-            <button class="btn-primary-action" onclick="simulateEvent()">+ Trigger Telemetry Alert</button>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn-hitl-primary" onclick="approveMorningPlan()">⚡ Approve Morning Plan (HITL)</button>
+              <button class="btn-primary-action" onclick="simulateEvent()">+ Alert</button>
+            </div>
           </div>
+        </div>
+
+        <!-- 08:00 AM HITL MORNING ACTION BAR -->
+        <div class="morning-action-bar">
+          <div class="action-bar-left">
+            <span class="action-badge-tag">08:00 AM MORNING FOCUS</span>
+            <span class="action-bar-text" id="morning-focus-text">Container #3 Thermal Drift Detected (42.1°C). Curtail Charge Rate to 0.5C before 09:00 AM Peak.</span>
+          </div>
+          <button class="btn-cta-gold" onclick="executeHitlAction('curtail')">✔ Approve 0.5C Curtailment</button>
         </div>
 
         <div class="two-col-grid">
@@ -201,6 +220,25 @@
           <div class="slate-kpi-card"><span class="kpi-title">OFFTAKER SLA STATUS</span><span class="kpi-number cyan-text">COMPLIANT</span><span class="kpi-desc">Utility PPA Verified</span></div>
         </div>
 
+        <!-- DOWNTIME PENALTY BUFFER GAUGE -->
+        <div class="sla-buffer-gauge-card">
+          <div class="gauge-header">
+            <div>
+              <span class="gauge-title">CONTRACTUAL DOWNTIME BUFFER COUNTDOWN (Q3 SLA BOUNDARY)</span>
+              <p class="gauge-sub">16.1 Hours of excusable downtime buffer remaining before $12,500/hr utility penalties apply.</p>
+            </div>
+            <button class="btn-hitl-primary" onclick="executeHitlAction('reconcile-sla')">✔ Reconcile & Lock Outage Buffer (HITL)</button>
+          </div>
+          <div class="gauge-bar-track">
+            <div class="gauge-bar-fill" style="width: 8%; background: var(--emerald-400);"></div>
+          </div>
+          <div class="gauge-footer-labels">
+            <span>Used: 1.4 Hours (8.0%)</span>
+            <span style="color:var(--emerald-400); font-weight:700;">Remaining Safe Buffer: 16.1 Hours (92.0%)</span>
+            <span>Max Quarter Cap: 17.5 Hours</span>
+          </div>
+        </div>
+
         <div class="slate-card">
           <div class="card-header-row">
             <h3>Outage Log & Downtime Reconciler</h3>
@@ -263,6 +301,19 @@
           <div class="chart-wrapper">
             <canvas id="arbitrageChartCanvas"></canvas>
           </div>
+        </div>
+
+        <!-- NET ARBITRAGE MARGIN FORMULA BOX -->
+        <div class="margin-formula-box">
+          <div class="formula-title">⚡ REAL-TIME NET ARBITRAGE MARGIN MATH (HITL DISPATCH GUARDRAIL)</div>
+          <div class="formula-equation">
+            <div class="eq-block"><span class="eq-label">SPOT LMP PRICE</span><span class="eq-value green-text">$248.50 / MWh</span></div>
+            <span class="eq-op">−</span>
+            <div class="eq-block"><span class="eq-label">CELL WEAR COST</span><span class="eq-value amber-text">$38.10 / MWh</span></div>
+            <span class="eq-op">=</span>
+            <div class="eq-block highlight"><span class="eq-label">NET PROFIT SPREAD</span><span class="eq-value cyan-text">+$210.40 / MWh</span></div>
+          </div>
+          <button class="btn-hitl-primary" onclick="executeHitlAction('arbitrage-dispatch')">⚡ Approve 25 MW Spot Discharge (HITL)</button>
         </div>
 
         <div class="two-col-grid">

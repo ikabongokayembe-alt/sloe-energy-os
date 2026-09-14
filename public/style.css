@@ -523,8 +523,140 @@ input:checked + .slider:before { transform: translateX(16px); }
 
 .width-50 { width: 50%; }
 .form-row { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }
-.form-row label { font-size: 0.78rem; color: var(--slate-400); }
-.form-row input { background: var(--slate-950); border: 1px solid var(--slate-800); border-radius: 6px; padding: 0.5rem 0.75rem; color: #fff; font-family: var(--font-mono); font-size: 0.82rem; }
+/* LIVE ISO TIMER & HITL ACTION BUTTON STYLES */
+.iso-timer-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+}
+.timer-icon { font-size: 0.85rem; }
+.timer-label { color: var(--amber-400); font-weight: 600; font-size: 0.72rem; }
+.timer-countdown { color: #FFFFFF; font-family: var(--font-mono); font-weight: 800; font-size: 0.85rem; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+
+.btn-hitl-shift-end {
+  background: linear-gradient(135deg, #4F46E5, #3730A3);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+  transition: all 0.2s ease;
+}
+.btn-hitl-shift-end:hover {
+  background: linear-gradient(135deg, #6366F1, #4338CA);
+  transform: translateY(-1px);
+}
+
+.btn-hitl-primary {
+  background: linear-gradient(135deg, #06B6D4, #0284C7);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+  transition: all 0.15s ease;
+}
+.btn-hitl-primary:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #22D3EE, #0369A1);
+}
+
+.btn-cta-gold {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #0F172A;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+.btn-cta-gold:hover { background: linear-gradient(135deg, #FBBF24, #B45309); }
+
+/* 08:00 AM MORNING HITL FOCUS BAR */
+.morning-action-bar {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 12px;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.action-bar-left { display: flex; align-items: center; gap: 0.85rem; }
+.action-badge-tag {
+  background: #F59E0B;
+  color: #0F172A;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-weight: 900;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+.action-bar-text { font-size: 0.86rem; color: #FFFFFF; font-weight: 500; }
+
+/* NET ARBITRAGE MARGIN FORMULA BOX */
+.margin-formula-box {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(3, 7, 18, 0.95));
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+.formula-title { font-size: 0.7rem; font-family: var(--font-mono); font-weight: 800; color: var(--cyan-400); letter-spacing: 0.08em; }
+.formula-equation {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: rgba(3, 7, 18, 0.6);
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.eq-block { display: flex; flex-direction: column; gap: 0.2rem; }
+.eq-block.highlight { background: rgba(6, 182, 212, 0.15); padding: 0.4rem 0.85rem; border-radius: 8px; border: 1px solid rgba(6, 182, 212, 0.3); }
+.eq-label { font-size: 0.62rem; font-family: var(--font-mono); color: var(--slate-400); font-weight: 700; }
+.eq-value { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; }
+.eq-op { font-size: 1.4rem; color: var(--slate-500); font-weight: 300; }
+
+/* DOWNTIME PENALTY BUFFER GAUGE */
+.sla-buffer-gauge-card {
+  background: linear-gradient(145deg, rgba(17, 24, 39, 0.85), rgba(11, 15, 23, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+.gauge-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.gauge-title { font-size: 0.72rem; font-family: var(--font-mono); font-weight: 800; color: var(--emerald-400); letter-spacing: 0.08em; }
+.gauge-sub { font-size: 0.8rem; color: var(--slate-300); margin-top: 0.15rem; }
+.gauge-bar-track { height: 12px; background: rgba(3, 7, 18, 0.8); border-radius: 99px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); }
+.gauge-bar-fill { height: 100%; transition: width 0.3s ease; }
+.gauge-footer-labels { display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--slate-400); font-family: var(--font-mono); }
 
 /* CHAT WORKSPACE & AGENT UI STYLES (MATCHING SCALING SLOE LABS SYSTEM) */
 .chat-view-topbar {

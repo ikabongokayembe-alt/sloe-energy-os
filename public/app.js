@@ -762,7 +762,52 @@ function triggerAttachment() {
   alert('📎 Attach telemetry log file or SCADA CSV export.');
 }
 
+// -------------------------------------------------------------
+// WORKFLOW & HITL CALL-TO-ACTION (CTA) HANDLERS
+// -------------------------------------------------------------
+function executeHitlAction(actionType) {
+  if (actionType === 'curtail') {
+    alert('✔ HITL Action Executed: Container #3 charge rate curtailed to 0.5C. SCADA Modbus register updated.');
+    appendConsoleLine('[HITL CTA]: Approved 0.5C curtailment for Container #3 thermal drift.', 'action');
+    const barText = document.getElementById('morning-focus-text');
+    if (barText) barText.innerText = '✓ Container #3 Curtailment Active (0.5C). Thermal drift resolved.';
+  } else if (actionType === 'arbitrage-dispatch') {
+    alert('⚡ HITL Action Executed: 25 MW Spot Discharge dispatched to ERCOT South Node @ $248.50/MWh.');
+    appendConsoleLine('[HITL CTA]: Dispatched 25 MW discharge @ $248.50/MWh. Net margin +$210.40/MWh locked.', 'action');
+  } else if (actionType === 'reconcile-sla') {
+    alert('✔ HITL Action Executed: Downtime buffer reconciled. 16.1 Hours remaining locked for Q3 SLA audit.');
+    appendConsoleLine('[HITL CTA]: Outage buffer reconciled & locked for utility auditor.', 'action');
+  } else {
+    alert(`✔ HITL Action Executed: Executed ${actionType} workflow.`);
+  }
+}
+
+function approveMorningPlan() {
+  alert('⚡ Morning Fleet Plan Approved: Dispatched Container #3 thermal curtailment, synchronized 5-min ISO bidding stack, and logged daily availability target (99.82%).');
+  appendConsoleLine('[WORKFLOW 08:00 AM]: User approved 08:00 AM Morning Fleet Plan (HITL).', 'action');
+}
+
+function executeEndShiftHandover() {
+  alert('🌙 Shift Handover Completed (05:00 PM Knock-off):\n1. Locked 24/7 Autonomous AI Safety & Trading Guardrails.\n2. Generated Shift Handover Briefing PDF.\n3. Logged off control desk.');
+  appendConsoleLine('[WORKFLOW 05:00 PM]: User completed End-of-Shift Handover & engaged Night AI Guardrails.', 'action');
+}
+
+// LIVE 5-MINUTE ISO BID GATE COUNTDOWN TIMER
+let timerSeconds = 222; // 03:42
+function startIsoGateTimer() {
+  setInterval(() => {
+    timerSeconds--;
+    if (timerSeconds <= 0) timerSeconds = 300; // Reset 5-min interval
+
+    const min = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+    const sec = String(timerSeconds % 60).padStart(2, '0');
+    const clockEl = document.getElementById('timer-clock-text');
+    if (clockEl) clockEl.innerText = `${min}:${sec}`;
+  }, 1000);
+}
+
 // Re-render on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   renderConversationsList();
+  startIsoGateTimer();
 });

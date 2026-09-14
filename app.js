@@ -131,9 +131,6 @@ function renderDynamicNav() {
     domainBadge.className = `domain-badge ${config.domainClass}`;
   }
 
-  const toggleLabel = document.getElementById('domain-toggle-label');
-  if (toggleLabel) toggleLabel.innerText = config.toggleLabel;
-
   const todayBadge = document.getElementById('today-market-badge');
   if (todayBadge) todayBadge.innerText = config.todayBadge;
 

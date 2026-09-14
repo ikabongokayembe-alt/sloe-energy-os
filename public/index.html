@@ -780,6 +780,98 @@
         </div>
       </div>
 
+      <!-- NEW SCREEN: PHYSICAL SCADA SITE TWIN 2D MAP -->
+      <div class="view-screen" id="view-scada-twin">
+        <div class="ops-page-header">
+          <h2>🗺️ Physical SCADA Site Twin & 2D Layout</h2>
+          <p>Interactive spatial digital twin of 12 Megapack BESS containers, inverter banks, and main transformer substation.</p>
+        </div>
+
+        <div class="scada-twin-layout">
+          <div class="scada-substation-bar">
+            <div class="substation-left">
+              <h4>⚡ Interconnection Substation & Grid Bus (345kV ERCOT Interconnect)</h4>
+              <p>Total Plant Output: <strong>120 MW / 240 MWh</strong> | Substation Frequency: <strong>59.98 Hz</strong> | Transformer Temp: <strong>48.2°C</strong></p>
+            </div>
+            <button class="btn-hitl-primary" onclick="openDrawer('Substation Telemetry', '<h4>Main Interconnection Substation</h4><p>Voltage: 345.2 kV<br>Frequency: 59.98 Hz<br>Main Breaker Status: CLOSED<br>Protection Relay: NORMAL</p>')">Inspect Substation</button>
+          </div>
+
+          <div class="slate-card">
+            <h3>BESS Container Nodes (Click node to inspect live telemetry drawer)</h3>
+            <div class="scada-containers-grid" id="scada-nodes-container">
+              <!-- Dynamically populated via app.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW SCREEN: PPA & ISO SETTLEMENT RECONCILER -->
+      <div class="view-screen" id="view-settlements">
+        <div class="ops-page-header">
+          <h2>🧾 Monthly Utility PPA & ISO Settlement Reconciler</h2>
+          <p>Reconcile physical revenue meter MWh logs against monthly utility PPA capacity invoices & ISO shadow billing statements.</p>
+        </div>
+
+        <div class="settlement-summary-grid">
+          <div class="settlement-card">
+            <span class="s-title">FIXED CAPACITY INVOICE</span>
+            <span class="s-amount green-text">$480,000</span>
+            <span style="font-size:0.75rem; color:var(--slate-400);">120 MW @ $4,000/MW-month</span>
+          </div>
+          <div class="settlement-card">
+            <span class="s-title">VARIABLE ENERGY CREDITS</span>
+            <span class="s-amount cyan-text">+$142,850</span>
+            <span style="font-size:0.75rem; color:var(--slate-400);">4,120 MWh Delivered</span>
+          </div>
+          <div class="settlement-card">
+            <span class="s-title">LIQUIDATED DAMAGES (LD)</span>
+            <span class="s-amount green-text">$0.00</span>
+            <span style="font-size:0.75rem; color:var(--slate-400);">Uptime Buffer Preserved (99.82%)</span>
+          </div>
+        </div>
+
+        <div class="slate-card">
+          <div class="card-header-row">
+            <h3>Monthly Line-Item Statement & Meter Log Audit</h3>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn-hitl-primary" onclick="fileIsoDispute()">⚖️ File ISO Market Dispute</button>
+              <button class="btn-primary-action" onclick="exportSecPpaPdf()">📥 Export SEC & Utility Invoicing PDF</button>
+            </div>
+          </div>
+
+          <table class="queue-table">
+            <thead>
+              <tr>
+                <th>Statement ID</th>
+                <th>Billing Period</th>
+                <th>Delivered MWh</th>
+                <th>Capacity Payment</th>
+                <th>Discrepancy Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:#fff; font-weight:bold;">#SET-9910</td>
+                <td>Aug 2026 (Monthly Final)</td>
+                <td>4,120 MWh</td>
+                <td style="color:var(--emerald-400); font-weight:bold;">$622,850.00</td>
+                <td><span class="status-pill green">Reconciled (0% Variance)</span></td>
+                <td><button class="btn-refresh" onclick="openDrawer('Statement #SET-9910', '<h4>Statement #SET-9910 Audit</h4><p>Capacity Charge: $480,000<br>Energy Credit: $142,850<br>Outage Penalty: $0.00<br>Status: Matched ISO Meter Log</p>')">Inspect</button></td>
+              </tr>
+              <tr>
+                <td style="color:#fff; font-weight:bold;">#SET-9911</td>
+                <td>Sep 2026 (Mid-Month Draft)</td>
+                <td>1,840 MWh</td>
+                <td style="color:var(--cyan-400); font-weight:bold;">$278,100.00</td>
+                <td><span class="status-pill blue">Draft Processing</span></td>
+                <td><button class="btn-refresh" onclick="openDrawer('Statement #SET-9911', '<h4>Draft Statement #SET-9911</h4><p>Capacity Charge: $240,000<br>Energy Credit: $38,100<br>Pending ISO Meter Verification</p>')">Inspect</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- SCREEN 5: SETTINGS -->
       <div class="view-screen" id="view-settings">
         <div class="ops-page-header">
@@ -799,6 +891,25 @@
 
     </main>
   </div>
+
+  <!-- SLIDE-OVER DETAIL DRAWER OVERLAY -->
+  <div class="slideover-overlay" id="slideover-drawer" onclick="closeDrawer(event)">
+    <div class="slideover-panel" onclick="event.stopPropagation()">
+      <div class="slideover-header">
+        <h3 id="drawer-title">Inspection Drawer</h3>
+        <button class="btn-drawer-close" onclick="closeDrawerDirect()">✕</button>
+      </div>
+      <div class="slideover-body" id="drawer-body">
+        <!-- Content dynamically injected via app.js -->
+      </div>
+      <div class="slideover-footer" id="drawer-footer">
+        <button class="btn-primary-action" onclick="closeDrawerDirect()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IN-APP TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
 
   <!-- INTERACTIVE MODAL -->
   <div class="modal-overlay" id="app-modal" onclick="closeModal(event)">

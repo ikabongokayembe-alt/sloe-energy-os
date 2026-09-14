@@ -24,17 +24,18 @@ const NAV_CONFIG = {
     toggleLabel: 'Switch to Merchant Market',
     todayBadge: 'CONTRACTED ASSET OPERATIONS',
     todayDesc: 'Live availability tracking & telemetry-backed exception queue for PPA & Tolling contracts.',
-    tool1Name: 'Availability SLA Tracker',
-    tool1Desc: 'Monitor 99.8% plant uptime & contract SLAs.',
+    tool1Name: 'Physical SCADA Twin',
+    tool1Desc: 'Inspect 2D site layout & live container telemetry.',
     tool2Name: 'Thermal Fade Engine',
     tool2Desc: 'Audit CATL/Tesla battery degradation curves.',
     opsNav: [
-      { id: 'tool-sla', icon: '📊', label: 'Availability SLA Tracker' },
-      { id: 'tool-degradation', icon: '📉', label: 'Thermal & SoH Fade' }
+      { id: 'scada-twin', icon: '🗺️', label: 'Physical SCADA Twin' },
+      { id: 'tool-degradation', icon: '📉', label: 'Thermal & SoH Fade' },
+      { id: 'tool-sla', icon: '📊', label: 'Availability SLA Tracker' }
     ],
     growthNav: [
-      { id: 'tool-warranty', icon: '📜', label: 'OEM Warranty Guardrail' },
-      { id: 'tool-dispatch', icon: '🛠️', label: 'O&M Field Dispatch' }
+      { id: 'tool-dispatch', icon: '🛠️', label: 'O&M Field Dispatch' },
+      { id: 'settlements', icon: '🧾', label: 'PPA Invoices & Settlements' }
     ],
     queueHead: ['Exception ID', 'Asset Unit', 'Trigger Category', 'Agent Recommendation', 'Severity', 'Action'],
     queueRows: [
@@ -54,12 +55,13 @@ const NAV_CONFIG = {
     tool2Name: 'Cycling Cost Engine',
     tool2Desc: 'Calculate marginal degradation cost per cycle.',
     opsNav: [
+      { id: 'quant-forecast', icon: '🌤️', label: 'ERCOT / CAISO Quant' },
       { id: 'tool-arbitrage', icon: '⚡', label: 'LMP Spot Arbitrage Radar' },
       { id: 'tool-cycling', icon: '💰', label: 'Cycling Cost & Revenue' }
     ],
     growthNav: [
-      { id: 'quant-forecast', icon: '🌤️', label: 'ERCOT/CAISO Quant' },
-      { id: 'ppa-hedges', icon: '📜', label: 'Bilateral PPA & Hedges' }
+      { id: 'ppa-hedges', icon: '📜', label: 'Bilateral PPA & Hedges' },
+      { id: 'settlements', icon: '🧾', label: 'ISO Market Settlements' }
     ],
     queueHead: ['Bid ID', 'Market Node', 'Volume (MW)', 'Target LMP ($)', 'Degradation Cost', 'Action'],
     queueRows: [
@@ -763,8 +765,144 @@ function startNewConversation() {
   renderConversationsList();
 }
 
+// -------------------------------------------------------------
+// IN-APP TOAST NOTIFICATION ENGINE (ZERO BROWSER POPUPS)
+// -------------------------------------------------------------
+function showToast(title, msg, type = 'action') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const icons = {
+    success: '✔',
+    action: '⚡',
+    warning: '⚠️',
+    error: '🚨'
+  };
+
+  const toast = document.createElement('div');
+  toast.className = `toast-item ${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || '⚡'}</span>
+    <div class="toast-body">
+      <span class="toast-title">${title}</span>
+      <span class="toast-msg">${msg}</span>
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'slideInToast 0.25s reverse forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+// -------------------------------------------------------------
+// SLIDE-OVER DETAIL DRAWER ENGINE
+// -------------------------------------------------------------
+function openDrawer(title, contentHtml) {
+  const drawer = document.getElementById('slideover-drawer');
+  const drawerTitle = document.getElementById('drawer-title');
+  const drawerBody = document.getElementById('drawer-body');
+
+  if (drawerTitle) drawerTitle.innerText = title;
+  if (drawerBody) drawerBody.innerHTML = contentHtml;
+  if (drawer) drawer.classList.add('open');
+}
+
+function closeDrawer(e) {
+  if (e.target.id === 'slideover-drawer') closeDrawerDirect();
+}
+
+function closeDrawerDirect() {
+  const drawer = document.getElementById('slideover-drawer');
+  if (drawer) drawer.classList.remove('open');
+}
+
+// -------------------------------------------------------------
+// PHYSICAL SCADA SITE TWIN 2D MAP RENDERER
+// -------------------------------------------------------------
+const SCADA_CONTAINER_NODES = [
+  { id: 'BESS-01', temp: '22.4°C', soc: '84.2%', status: 'healthy', voltage: '1,420 V' },
+  { id: 'BESS-02', temp: '23.1°C', soc: '83.9%', status: 'healthy', voltage: '1,418 V' },
+  { id: 'BESS-03', temp: '42.1°C', soc: '78.0%', status: 'warning', voltage: '1,392 V' },
+  { id: 'BESS-04', temp: '22.8°C', soc: '84.0%', status: 'healthy', voltage: '1,421 V' },
+  { id: 'BESS-05', temp: '21.9°C', soc: '85.1%', status: 'healthy', voltage: '1,425 V' },
+  { id: 'BESS-06', temp: '23.4°C', soc: '83.5%', status: 'healthy', voltage: '1,419 V' },
+  { id: 'BESS-07', temp: '22.0°C', soc: '84.8%', status: 'healthy', voltage: '1,422 V' },
+  { id: 'BESS-08', temp: '22.6°C', soc: '84.1%', status: 'healthy', voltage: '1,420 V' },
+  { id: 'BESS-09', temp: '23.0°C', soc: '83.8%', status: 'healthy', voltage: '1,418 V' },
+  { id: 'BESS-10', temp: '22.2°C', soc: '84.5%', status: 'healthy', voltage: '1,423 V' },
+  { id: 'BESS-11', temp: '22.7°C', soc: '84.0%', status: 'healthy', voltage: '1,421 V' },
+  { id: 'BESS-12', temp: '21.8°C', soc: '85.0%', status: 'healthy', voltage: '1,426 V' }
+];
+
+function renderScadaNodes() {
+  const container = document.getElementById('scada-nodes-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  SCADA_CONTAINER_NODES.forEach(node => {
+    const card = document.createElement('div');
+    card.className = 'scada-node-card';
+    card.onclick = () => inspectContainerNode(node.id);
+
+    card.innerHTML = `
+      <div class="node-top-row">
+        <span class="node-title">${node.id}</span>
+        <span class="node-status-dot ${node.status}"></span>
+      </div>
+      <div class="node-metrics-row">
+        <span>Temp: <strong class="node-temp-badge ${node.status === 'warning' ? 'high' : 'normal'}">${node.temp}</strong></span>
+        <span>SoC: <strong>${node.soc}</strong></span>
+      </div>
+      <div class="node-metrics-row">
+        <span>DC Bus: ${node.voltage}</span>
+        <span style="color:var(--cyan-400); font-weight:700;">Inspect →</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function inspectContainerNode(nodeId) {
+  const node = SCADA_CONTAINER_NODES.find(n => n.id === nodeId) || SCADA_CONTAINER_NODES[0];
+  const html = `
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+      <div style="background:rgba(3,7,18,0.6); padding:1rem; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+        <h4 style="font-family:var(--font-heading); color:#fff; font-size:1.1rem; margin-bottom:0.5rem;">${node.id} Telemetry Twin</h4>
+        <p>Status: <strong style="color:${node.status === 'warning' ? 'var(--amber-400)' : 'var(--emerald-400)'};">${node.status.toUpperCase()}</strong></p>
+        <p>Cell Temperature: <strong>${node.temp}</strong></p>
+        <p>State of Charge (SoC): <strong>${node.soc}</strong></p>
+        <p>DC Bus Voltage: <strong>${node.voltage}</strong></p>
+        <p>HVAC Chiller Status: <strong>ACTIVE (22°C Target)</strong></p>
+      </div>
+
+      <div class="form-row">
+        <label>Adjust Container HVAC Cooling Setpoint</label>
+        <input type="range" min="15" max="30" value="22" oninput="showToast('HVAC Target', 'Updated ' + '${node.id}' + ' HVAC to ' + this.value + '°C', 'action')">
+      </div>
+
+      <button class="btn-hitl-primary" onclick="showToast('Cell Balance', 'Triggered passive cell balancing for ' + '${node.id}', 'success'); closeDrawerDirect();">⚡ Run Container Balancing Cycle</button>
+    </div>
+  `;
+  openDrawer(`${node.id} SCADA Detail`, html);
+}
+
+function fileIsoDispute() {
+  const stmt = prompt('Enter Billing Statement ID for ISO Market Dispute:', '#SET-9911');
+  if (!stmt) return;
+  showToast('ISO Dispute Filed', `Submitted market dispute for ${stmt} to ISO Market Operator. Meter logs attached.`, 'warning');
+  appendConsoleLine(`[SETTLEMENTS]: Filed ISO market dispute ticket for ${stmt}.`, 'action');
+}
+
+function exportSecPpaPdf() {
+  showToast('PDF Export', 'Generated SEC & Utility Compliant Invoicing Memo (PDF). Ingestion verification matched.', 'success');
+  appendConsoleLine('[SETTLEMENTS]: Exported SEC & Utility PPA Compliance Memo (PDF).', 'action');
+}
+
 function triggerAttachment() {
-  alert('📎 Attach telemetry log file or SCADA CSV export.');
+  showToast('Attachment', 'Loaded SCADA telemetry log export file.', 'action');
 }
 
 // -------------------------------------------------------------
@@ -772,28 +910,28 @@ function triggerAttachment() {
 // -------------------------------------------------------------
 function executeHitlAction(actionType) {
   if (actionType === 'curtail') {
-    alert('✔ HITL Action Executed: Container #3 charge rate curtailed to 0.5C. SCADA Modbus register updated.');
+    showToast('0.5C Curtailment Active', 'Container #3 charge rate curtailed to 0.5C. SCADA Modbus register updated.', 'success');
     appendConsoleLine('[HITL CTA]: Approved 0.5C curtailment for Container #3 thermal drift.', 'action');
     const barText = document.getElementById('morning-focus-text');
     if (barText) barText.innerText = '✓ Container #3 Curtailment Active (0.5C). Thermal drift resolved.';
   } else if (actionType === 'arbitrage-dispatch') {
-    alert('⚡ HITL Action Executed: 25 MW Spot Discharge dispatched to ERCOT South Node @ $248.50/MWh.');
+    showToast('Spot Discharge Executed', '25 MW Discharge dispatched to ERCOT South Node @ $248.50/MWh. Net profit +$210.40/MWh.', 'action');
     appendConsoleLine('[HITL CTA]: Dispatched 25 MW discharge @ $248.50/MWh. Net margin +$210.40/MWh locked.', 'action');
   } else if (actionType === 'reconcile-sla') {
-    alert('✔ HITL Action Executed: Downtime buffer reconciled. 16.1 Hours remaining locked for Q3 SLA audit.');
+    showToast('Outage Buffer Reconciled', '16.1 Hours remaining downtime buffer locked for Q3 SLA audit.', 'success');
     appendConsoleLine('[HITL CTA]: Outage buffer reconciled & locked for utility auditor.', 'action');
   } else {
-    alert(`✔ HITL Action Executed: Executed ${actionType} workflow.`);
+    showToast('HITL Executed', `Executed ${actionType} workflow.`, 'action');
   }
 }
 
 function approveMorningPlan() {
-  alert('⚡ Morning Fleet Plan Approved: Dispatched Container #3 thermal curtailment, synchronized 5-min ISO bidding stack, and logged daily availability target (99.82%).');
+  showToast('Morning Plan Approved', 'Dispatched Container #3 curtailment, synchronized 5-min ISO bidding stack, and logged daily SLA uptime target (99.82%).', 'success');
   appendConsoleLine('[WORKFLOW 08:00 AM]: User approved 08:00 AM Morning Fleet Plan (HITL).', 'action');
 }
 
 function executeEndShiftHandover() {
-  alert('🌙 Shift Handover Completed (05:00 PM Knock-off):\n1. Locked 24/7 Autonomous AI Safety & Trading Guardrails.\n2. Generated Shift Handover Briefing PDF.\n3. Logged off control desk.');
+  showToast('05:00 PM Shift Handover', 'Locked 24/7 Autonomous AI Safety & Trading Guardrails. Generated Shift Summary PDF.', 'success');
   appendConsoleLine('[WORKFLOW 05:00 PM]: User completed End-of-Shift Handover & engaged Night AI Guardrails.', 'action');
 }
 
@@ -814,5 +952,6 @@ function startIsoGateTimer() {
 // Re-render on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   renderConversationsList();
+  renderScadaNodes();
   startIsoGateTimer();
 });

@@ -963,19 +963,166 @@ input:checked + .slider:before { transform: translateX(16px); }
   border-radius: 4px;
 
 }
-.conv-unread-badge {
-  background: #EAB308;
-  color: #0F172A;
-  font-size: 0.65rem;
-  font-weight: 800;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+/* IN-APP TOAST NOTIFICATION ENGINE */
+#toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  min-width: 320px;
+  max-width: 420px;
+  background: rgba(11, 15, 23, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.85rem 1.1rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-left: auto;
+  gap: 0.75rem;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+  animation: slideInToast 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes slideInToast {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-icon { font-size: 1.25rem; }
+.toast-body { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; }
+.toast-title { font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: #FFFFFF; }
+.toast-msg { font-size: 0.76rem; color: var(--slate-300); line-height: 1.3; }
+
+.toast-item.success { border-color: rgba(52, 211, 153, 0.4); }
+.toast-item.action { border-color: rgba(6, 182, 212, 0.4); }
+.toast-item.warning { border-color: rgba(245, 158, 11, 0.4); }
+.toast-item.error { border-color: rgba(244, 63, 94, 0.4); }
+
+/* SLIDE-OVER DETAIL DRAWER PANEL */
+.slideover-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(3, 7, 18, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 900;
+  justify-content: flex-end;
+}
+
+.slideover-overlay.open { display: flex; }
+
+.slideover-panel {
+  width: 480px;
+  max-width: 90vw;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(3, 7, 18, 0.98));
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: -20px 0 50px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  animation: slideInDrawer 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInDrawer {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.slideover-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.slideover-header h3 { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: #FFFFFF; }
+.btn-drawer-close { background: transparent; border: none; color: var(--slate-400); font-size: 1.25rem; cursor: pointer; }
+.btn-drawer-close:hover { color: #FFFFFF; }
+
+.slideover-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.15rem; font-size: 0.85rem; color: var(--slate-300); }
+.slideover-footer { padding: 1.25rem 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end; gap: 0.75rem; }
+
+/* PHYSICAL SCADA TWIN 2D MAP STYLES */
+.scada-twin-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.scada-containers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.scada-node-card {
+  background: rgba(3, 7, 18, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.scada-node-card:hover {
+  border-color: var(--cyan-400);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.2);
+  background: rgba(17, 24, 39, 0.85);
+}
+
+.node-top-row { display: flex; justify-content: space-between; align-items: center; }
+.node-title { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; color: #FFFFFF; }
+.node-status-dot { width: 10px; height: 10px; border-radius: 50%; }
+.node-status-dot.healthy { background: var(--emerald-400); box-shadow: 0 0 8px var(--emerald-400); }
+.node-status-dot.warning { background: var(--amber-400); box-shadow: 0 0 8px var(--amber-400); }
+.node-status-dot.fault { background: var(--rose-500); box-shadow: 0 0 8px var(--rose-500); }
+
+.node-metrics-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--slate-400); font-family: var(--font-mono); }
+.node-temp-badge { font-weight: 700; }
+.node-temp-badge.normal { color: var(--emerald-400); }
+.node-temp-badge.high { color: var(--amber-400); }
+
+.scada-substation-bar {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.substation-left h4 { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: #FFFFFF; }
+.substation-left p { font-size: 0.78rem; color: var(--slate-400); margin-top: 0.15rem; }
+
+/* SETTLEMENTS & INVOICING RECONCILER STYLES */
+.settlement-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; }
+.settlement-card {
+  background: linear-gradient(145deg, rgba(17, 24, 39, 0.8), rgba(11, 15, 23, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.settlement-card .s-title { font-size: 0.68rem; font-family: var(--font-mono); font-weight: 800; color: var(--slate-400); }
+.settlement-card .s-amount { font-family: var(--font-heading); font-size: 1.75rem; font-weight: 800; color: #FFFFFF; }
 
 /* RIGHT CHAT READER PANEL */
 .chat-reader-panel {

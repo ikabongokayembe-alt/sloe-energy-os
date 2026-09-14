@@ -909,30 +909,105 @@ function triggerAttachment() {
 // WORKFLOW & HITL CALL-TO-ACTION (CTA) HANDLERS
 // -------------------------------------------------------------
 function executeHitlAction(actionType) {
+  const modal = document.getElementById('app-modal');
+  const title = document.getElementById('modal-title');
+  const body = document.getElementById('modal-body');
+  const footer = document.getElementById('modal-footer');
+
+  if (!modal || !body) return;
+
   if (actionType === 'curtail') {
-    showToast('0.5C Curtailment Active', 'Container #3 charge rate curtailed to 0.5C. SCADA Modbus register updated.', 'success');
-    appendConsoleLine('[HITL CTA]: Approved 0.5C curtailment for Container #3 thermal drift.', 'action');
-    const barText = document.getElementById('morning-focus-text');
-    if (barText) barText.innerText = '✓ Container #3 Curtailment Active (0.5C). Thermal drift resolved.';
+    title.innerText = '🛡️ HITL Action Preview: BESS Container #3 Curtailment';
+    body.innerHTML = `
+      <div class="hitl-preview-card">
+        <div class="hitl-proposal-row">
+          <span class="hitl-proposal-icon">🤖</span>
+          <div class="hitl-proposal-text">
+            <h4>PROPOSED ACTION: Curtail Container #3 Charge Rate to 0.5C</h4>
+            <p>The Operator detected thermal drift (42.1°C). Proposed action will reduce charge current to lower heat generation before the 09:00 AM peak.</p>
+          </div>
+        </div>
+        <div class="hitl-proof-grid">
+          <div class="hitl-proof-box"><span class="proof-label">CURRENT TEMP</span><span class="proof-val" style="color:var(--amber-400);">42.1°C</span></div>
+          <div class="hitl-proof-box"><span class="proof-label">TARGET TEMP</span><span class="proof-val" style="color:var(--emerald-400);">22.4°C</span></div>
+          <div class="hitl-proof-box"><span class="proof-label">PENALTY RISK</span><span class="proof-val" style="color:var(--emerald-400);">$0.00</span></div>
+        </div>
+      </div>
+    `;
+    footer.innerHTML = `
+      <button class="btn-hitl-reject" onclick="closeModalDirect()">✕ Reject Proposal</button>
+      <button class="btn-hitl-confirm" onclick="confirmHitlExecution('curtail')">✔ CONFIRM & DISPATCH (HUMAN SIGN-OFF)</button>
+    `;
   } else if (actionType === 'arbitrage-dispatch') {
-    showToast('Spot Discharge Executed', '25 MW Discharge dispatched to ERCOT South Node @ $248.50/MWh. Net profit +$210.40/MWh.', 'action');
-    appendConsoleLine('[HITL CTA]: Dispatched 25 MW discharge @ $248.50/MWh. Net margin +$210.40/MWh locked.', 'action');
+    title.innerText = '⚡ HITL Action Preview: 5-Min Spot Discharge';
+    body.innerHTML = `
+      <div class="hitl-preview-card">
+        <div class="hitl-proposal-row">
+          <span class="hitl-proposal-icon">📈</span>
+          <div class="hitl-proposal-text">
+            <h4>PROPOSED ACTION: Dispatch 25 MW Discharge @ ERCOT South</h4>
+            <p>The Analyst detected a $248.50/MWh price surge. Gate closes in 03:42. Marginal cell wear is $38.10/MWh.</p>
+          </div>
+        </div>
+        <div class="hitl-proof-grid">
+          <div class="hitl-proof-box"><span class="proof-label">SPOT LMP</span><span class="proof-val" style="color:var(--emerald-400);">$248.50/MWh</span></div>
+          <div class="hitl-proof-box"><span class="proof-label">CELL WEAR</span><span class="proof-val" style="color:var(--amber-400);">$38.10/MWh</span></div>
+          <div class="hitl-proof-box"><span class="proof-label">NET PROFIT</span><span class="proof-val" style="color:var(--cyan-400);">+$210.40/MWh</span></div>
+        </div>
+      </div>
+    `;
+    footer.innerHTML = `
+      <button class="btn-hitl-reject" onclick="closeModalDirect()">✕ Reject Proposal</button>
+      <button class="btn-hitl-confirm" onclick="confirmHitlExecution('arbitrage-dispatch')">✔ CONFIRM & SUBMIT BID (HUMAN SIGN-OFF)</button>
+    `;
   } else if (actionType === 'reconcile-sla') {
-    showToast('Outage Buffer Reconciled', '16.1 Hours remaining downtime buffer locked for Q3 SLA audit.', 'success');
-    appendConsoleLine('[HITL CTA]: Outage buffer reconciled & locked for utility auditor.', 'action');
+    title.innerText = '📊 HITL Action Preview: Outage SLA Buffer Reconciliation';
+    body.innerHTML = `
+      <div class="hitl-preview-card">
+        <div class="hitl-proposal-row">
+          <span class="hitl-proposal-icon">📜</span>
+          <div class="hitl-proposal-text">
+            <h4>PROPOSED ACTION: Lock Q3 Downtime Buffer Log (16.1 Hrs Safe)</h4>
+            <p>Audits 1.4 hours of downtime against 17.5 hours quarterly allowance. Zero penalty accrued.</p>
+          </div>
+        </div>
+      </div>
+    `;
+    footer.innerHTML = `
+      <button class="btn-hitl-reject" onclick="closeModalDirect()">✕ Reject</button>
+      <button class="btn-hitl-confirm" onclick="confirmHitlExecution('reconcile-sla')">✔ CONFIRM & LOCK BUFFER</button>
+    `;
   } else {
-    showToast('HITL Executed', `Executed ${actionType} workflow.`, 'action');
+    confirmHitlExecution(actionType);
+    return;
+  }
+
+  modal.classList.add('open');
+}
+
+function confirmHitlExecution(actionType) {
+  closeModalDirect();
+  if (actionType === 'curtail') {
+    showToast('HUMAN SIGN-OFF APPROVED', 'Container #3 charge rate curtailed to 0.5C. SCADA Modbus register updated.', 'success');
+    appendConsoleLine('[HITL SIGN-OFF]: Human Operator approved 0.5C curtailment for Container #3.', 'action');
+    const barText = document.getElementById('morning-focus-text');
+    if (barText) barText.innerText = '✓ Human Approved: Container #3 Curtailment Active (0.5C).';
+  } else if (actionType === 'arbitrage-dispatch') {
+    showToast('HUMAN SIGN-OFF APPROVED', '25 MW Discharge submitted to ERCOT South @ $248.50/MWh (Net Profit +$210.40/MWh).', 'action');
+    appendConsoleLine('[HITL SIGN-OFF]: Human Trader confirmed 25 MW spot discharge @ $248.50/MWh.', 'action');
+  } else if (actionType === 'reconcile-sla') {
+    showToast('HUMAN SIGN-OFF APPROVED', 'Downtime buffer reconciled. 16.1 Hours safe buffer locked.', 'success');
+    appendConsoleLine('[HITL SIGN-OFF]: Human Compliance Officer locked Q3 downtime buffer log.', 'action');
   }
 }
 
 function approveMorningPlan() {
-  showToast('Morning Plan Approved', 'Dispatched Container #3 curtailment, synchronized 5-min ISO bidding stack, and logged daily SLA uptime target (99.82%).', 'success');
-  appendConsoleLine('[WORKFLOW 08:00 AM]: User approved 08:00 AM Morning Fleet Plan (HITL).', 'action');
+  executeHitlAction('curtail');
 }
 
 function executeEndShiftHandover() {
-  showToast('05:00 PM Shift Handover', 'Locked 24/7 Autonomous AI Safety & Trading Guardrails. Generated Shift Summary PDF.', 'success');
-  appendConsoleLine('[WORKFLOW 05:00 PM]: User completed End-of-Shift Handover & engaged Night AI Guardrails.', 'action');
+  showToast('HUMAN SHIFT SIGN-OFF', 'Locked 24/7 Autonomous AI Safety & Trading Guardrails. Generated Shift Summary PDF.', 'success');
+  appendConsoleLine('[WORKFLOW 05:00 PM]: Human Operator signed off shift & engaged Night AI Guardrails.', 'action');
 }
 
 // LIVE 5-MINUTE ISO BID GATE COUNTDOWN TIMER

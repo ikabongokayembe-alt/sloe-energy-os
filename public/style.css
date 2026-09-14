@@ -521,6 +521,79 @@ input:checked + .slider:before { transform: translateX(16px); }
 .console-input-row { display: flex; gap: 0.75rem; }
 .console-input-row input { flex: 1; background: var(--slate-950); border: 1px solid var(--slate-800); border-radius: 6px; padding: 0.5rem 0.75rem; color: #fff; font-family: var(--font-mono); font-size: 0.8rem; outline: none; }
 
+/* HITL ACTION PREVIEW & CONFIRMATION MODAL STYLES */
+.hitl-preview-card {
+  background: rgba(3, 7, 18, 0.85);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hitl-proposal-row {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.hitl-proposal-icon { font-size: 1.4rem; }
+.hitl-proposal-text h4 { font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; color: #FFFFFF; }
+.hitl-proposal-text p { font-size: 0.8rem; color: var(--slate-300); margin-top: 0.2rem; line-height: 1.35; }
+
+.hitl-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+.hitl-proof-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.proof-label { font-size: 0.62rem; font-family: var(--font-mono); color: var(--slate-400); font-weight: 700; }
+.proof-val { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; color: #FFFFFF; }
+
+.hitl-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.btn-hitl-confirm {
+  background: linear-gradient(135deg, #10B981, #047857);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+.btn-hitl-confirm:hover { background: linear-gradient(135deg, #34D399, #059669); transform: translateY(-1px); }
+.btn-hitl-reject {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--slate-300);
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-hitl-reject:hover { background: rgba(244, 63, 94, 0.2); color: var(--rose-500); border-color: rgba(244, 63, 94, 0.4); }
+
 .width-50 { width: 50%; }
 .form-row { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }
 /* LIVE ISO TIMER & HITL ACTION BUTTON STYLES */
